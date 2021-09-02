@@ -1,3 +1,5 @@
+var User = require('../user/user.js');
+
 module.exports = function(app) {
     //app parses in the express object needed to check credentials
     // it then checks the form request against an array of users, if a match is found it will
@@ -10,17 +12,22 @@ module.exports = function(app) {
         
         user = {
             username:String,
-            birthdate:String,
-            age:Number,
             email:String,
             password:String,
+            role:String,
             valid:Boolean
         };
 
-        users = [ {username:'john52', birthdate:'22/2/1998', age:23, email:'john52@gmail.com', password:'abc123'}, 
-        {username:'aimee52', birthdate:'02/10/2000', age:20, email:'aimee52@gmail.com', password:'123abc'},
-        {username:'lachlan12', birthdate:'05/11/1997', age:23, email:'lachlan12@gmail.com', password:'password123'}
-        ];
+        superuser = new User('john52', 'abc123', 'john52@gmail.com', 1, 'superadmin');
+
+        adminuser = new User('aimee52', 'abc1234', 'john52@gmail.com', 2, 'groupadmin');
+
+        groupassis = new User('ben88', 'abc1235', 'john52@gmail.com', 3, 'groupassis');
+
+        standarduser = new User('mike22', 'abc1236', 'john52@gmail.com', 4, 'user');
+
+        users = [];
+        users.push(superuser, adminuser, groupassis, standarduser);
 
         
         user.username = req.body.username;

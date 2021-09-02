@@ -1,16 +1,22 @@
 class Group {
-    constructor(groupid, groupname) {
-        this.groupid = groupid;
+    constructor(groupname) {
         this.groupname = groupname;
+        this.channels = [];
+    }
+
+    addChannel(channel) {
+        this.channels.push(channel);
     }
 };
 
-class Channel extends Group {
-    constructor(groupid, groupname, channelid, channelname, users){
-        super(groupid, groupname);
-        this.channelid = channelid;
+class Channel {
+    constructor(channelname){
         this.channelname = channelname;
-        this.users = users;
+        this.users = [];
+    }
+
+    addUser(username) {
+        this.users.push(username)
     }
 
 }
