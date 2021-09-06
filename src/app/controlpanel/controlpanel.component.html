@@ -1,1 +1,77 @@
-<p>controlpanel works!</p>
+
+<h2>Group:</h2>
+<form class="mb-5">
+    <div class="form-group">
+      <label for="groupInput1">Group Name:</label>
+      <input type="text" [(ngModel)]="groupname" name="groupname" class="form-control" id="groupInput1" placeholder="Enter Group Name">
+    </div>
+    <button type="submit" class="btn btn-secondary mt-2" (click)="createGroup()">Create</button>
+    <button type="submit" class="btn btn-secondary mt-2" (click)="removeGroup()">Remove</button>
+</form>
+<h2>Channel:</h2>
+<form class="mb-5">
+    <div class="form-group">
+        <label for="groupInput2">Group:</label>
+        <select class="form-control" id="groupInput2" name="groupselect" [(ngModel)]="groupselect">
+            <option value="" selected disabled hidden>Select a Group</option>
+            <option *ngFor="let group of groups">{{group.groupname}}</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="channelInput">Channel Name:</label>
+        <input type="text" [(ngModel)]="channelname" name="channelname" class="form-control" id="channelInput" placeholder="Enter Channel Name">
+    </div>
+    <button type="submit" class="btn btn-primary mt-2" (click)="createChannel()">Create</button>
+    <button type="submit" class="btn btn-primary mt-2" (click)="removeChannel()">Remove</button>
+</form>
+
+<h2>User To Channel:</h2>
+<h2>{{channelselect}}</h2>
+<form class="mb-5">
+    <div class="form-group">
+        <label for="groupInput3">Group:</label>
+        <select class="form-control" id="groupInput3" name="groupselect2" [(ngModel)]="groupselect2" (ngModelChange)="select()">
+            <option value="" selected disabled hidden>Select a Group</option>
+            <option *ngFor="let group of groups">{{group.groupname}}</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="channelInput2">Channel:</label>
+        <select class="form-control" id="channelInput2" name="channelselect" [(ngModel)]="channelselect">
+            <option value="" selected disabled hidden>Select a Channel</option>
+            <option *ngFor="let channel of channels">{{channel.channelname}}</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="usernameInput1">Username:</label>
+        <input type="text" name="username" [(ngModel)]="username" class="form-control" id="usernameInput1" placeholder="Enter Username">
+    </div>
+    <button type="submit" (click)="addUser()" class="btn btn-primary mt-2">Invite</button>
+    <button type="submit" (click)="removeUser()" class="btn btn-primary mt-2">Remove</button>
+</form>
+
+<h2>Group Assis:</h2>
+<form class="mb-5">
+    <div class="form-group">
+        <label for="groupInput3">Group:</label>
+        <select class="form-control" id="groupInput3" name="groupselect3" [(ngModel)]="groupselect3">
+            <option value="" selected disabled hidden>Select a Group</option>
+            <option *ngFor="let group of groups">{{group.groupname}}</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="usernameInput2">Username:</label>
+        <input type="text" [(ngModel)]="username2" name="username2" class="form-control" id="usernameInput2" placeholder="Enter Username">
+    </div>
+    <button type="submit" class="btn btn-primary mt-2" (click)="promoteGroupAssis()">Promote Group Assis</button>
+</form>
+
+<h2>Promote User:</h2>
+<form class="mb-5">
+    <div class="form-group">
+        <label for="promoteInput">Username</label>
+        <input type="text" name="username3" [(ngModel)]="username3" class="form-control" id="promoteInput" placeholder="Enter Username">
+    </div>
+    <button type="submit" (click)="promoteSuper()" class="btn btn-primary mt-2">Super Admin</button>
+    <button type="submit" (click)="promoteGroupAdmin()" class="btn btn-primary mt-2">Group Admin</button>
+</form>

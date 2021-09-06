@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "username": "john52",
+      "password": "abc123",
+      "email": "john52@gmail.com",
+      "id": 0,
+      "role": "superadmin"
+    },
+    {
+      "username": "aimee52",
+      "password": "abc1234",
+      "email": "aimee52@gmail.com",
+      "id": 1,
+      "role": "groupadmin"
+    },
+    {
+      "username": "ben88",
+      "password": "abc12345",
+      "email": "ben88@gmail.com",
+      "id": 2,
+      "role": "groupassis"
+    },
+    {
+      "username": "mike22",
+      "password": "abc1236",
+      "email": "mike22@gmail.com",
+      "id": 3,
+      "role": "groupadmin"
+    }
+  ]
+}

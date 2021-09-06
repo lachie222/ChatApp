@@ -2,6 +2,7 @@ class Group {
     constructor(groupname) {
         this.groupname = groupname;
         this.channels = [];
+        this.groupassis = [];
     }
 
     addChannel(channel) {
