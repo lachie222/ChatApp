@@ -230,7 +230,7 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         } else {
-            if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
+            if (req.body.user.role == 'superadmin') {
                 username = req.body.username;
                 fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
                     /*Search for req username in userstorage and change their role to superadmin,

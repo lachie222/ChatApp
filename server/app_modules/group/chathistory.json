@@ -1,16 +1,4 @@
 {
   "chats": [
-    {
-      "location": {
-        "groupname": "new group",
-        "channelname": "new channel"
-      },
-      "chatdata": [
-        {
-          "username": "john52",
-          "message": "hello"
-        }
-      ]
-    }
   ]
 }

@@ -1,16 +1,4 @@
 {
   "groups": [
-    {
-      "groupname": "new group",
-      "channels": [
-        {
-          "channelname": "new channel",
-          "users": [
-            "terry"
-          ]
-        }
-      ],
-      "groupassis": []
-    }
   ]
 }
