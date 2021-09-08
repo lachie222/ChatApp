@@ -34,7 +34,9 @@ export class LoginComponent implements OnInit {
       groupdata?:Object;
     };
 
+
     this.http.post<usermessage>('http://localhost:3000/api/auth', {username: this.usernamelogin, password: this.passwordlogin}).subscribe(res => { 
+      console.log(res)
       if (res.user.valid == true) {
         sessionStorage.setItem('user', JSON.stringify(res.user));
         this.user = JSON.parse(sessionStorage.getItem('user')!);

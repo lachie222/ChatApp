@@ -7,12 +7,11 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         }
-
        fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
            /*If the request body username and password matches one found in userstorage,
            user will have a validated property and the remaining data will be sent back to the user, otherwise an error message will be sent */
             if (err) throw err;
-            let userdata = JSON.parse(data);
+            userdata = JSON.parse(data);
             users = userdata.users;
             username = req.body.username;
             password = req.body.password;
@@ -23,7 +22,7 @@ module.exports = function(app) {
                     user.valid = true;
                     role = user.role;
                     message = "Successful Login";
-                    res.send({message: message, user})
+                    res.send(JSON.stringify({message: message, user}))
                     break;
                 }else{
                     user.valid = false;
@@ -57,13 +56,13 @@ module.exports = function(app) {
             for (let i=0; i<users.length; i++){
                 if (user.username == users[i].username){
                     validrequest = false;
-                    msg = {msg: "Username already taken!"};
-                    res.send(msg);
+                    message = "Username already taken!";
+                    res.send({message: message});
                     break;
                 }else if (user.email == users[i].email){
                     validrequest = false;
-                    msg = {msg: "Email already taken!"}
-                    res.send(msg);
+                    message = "Email already taken!";
+                    res.send({message: message});
                     break;
                 }else {
                     validrequest = true;
@@ -74,8 +73,8 @@ module.exports = function(app) {
                 users.push(newuser);
                 fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
                 assignID();
-                msg = {msg:'User Successfully Created, Please login'};
-                res.send(msg);
+                message = 'User Successfully Created, Please login';
+                res.send({message: message});
             }
         });
 
@@ -86,9 +85,9 @@ module.exports = function(app) {
         userstorage */
         fs.readFile('./app_modules/user/userstorage.json', (err,data) => {
             if(err) throw err;
-            let userdata = JSON.parse(data);
+            userdata = JSON.parse(data);
             users = userdata.users;
-            for (let i=0; i<users.length; i++){
+            for (i=0; i<users.length; i++){
                 users[i].id = i;
             };
             fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));

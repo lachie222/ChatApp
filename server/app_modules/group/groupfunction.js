@@ -94,7 +94,7 @@ module.exports = function(app) {
 
                     fs.writeFileSync('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2));
                     message = "Channel Successfully Created";
-                    res.send({message: message})
+                    res.send({message: message});
                 })
             }else {
                 message = {message:"Incorrect Role"};
@@ -153,7 +153,6 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         } else {
-            req.body.user = JSON.parse(req.body.user);
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
                 fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
                     /*will search through group storage and match groups/channel names,
@@ -190,7 +189,6 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         } else {
-            req.body.user = JSON.parse(req.body.user);
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
                 fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
                     /* will search through groupstorage to find channel/group combo and then

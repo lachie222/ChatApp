@@ -21,7 +21,7 @@ export class ChatComponent implements OnInit {
   }
 
 
-  user = sessionStorage.getItem('user');
+  user = JSON.parse(sessionStorage.getItem('user')!);
   chatdata:Array<ChatData> = [];
   groupname:String="";
   username:String="";
@@ -42,22 +42,22 @@ export class ChatComponent implements OnInit {
     Chat is then stored in the chatdata variable so it can be displayed in html via data binding*/
     interface chatresponse {
       chatdata:Array<ChatData>;
-      message:String;
+      message:string;
     };
 
     this.http.post<chatresponse>('http://localhost:3000/api/retrievechat', {groupname: groupname, channelname: channelname}).subscribe(res => {
         console.log(res.message);
-        this.chatdata = (res.chatdata);
+        this.chatdata = res.chatdata;
     });
   };
 
   createMessage() {
     /* createMessage function sends post request to server to create a new chat object and send it to chat history using username, groupname and channel name as params, once a message has been sent, the chat will refresh itself by calling retrievechat function and message box will be reset */
     interface message {
-      message:String;
+      message:string;
     };
 
-    this.http.post<message>('http://localhost:3000/api/createchat', {user: this.user, groupname: this.groupname, channelname: this.channelname, message: this.message}).subscribe(res => { 
+    this.http.post<message>('http://localhost:3000/api/createchat', {user: this.user, groupname: this.groupname, channelname: this.channelname, message: this.message}).subscribe(res => {
         this.retrieveChat(this.groupname, this.channelname);
         console.log(res.message);
         this.message = '';
@@ -68,7 +68,7 @@ export class ChatComponent implements OnInit {
     /* addUser function will send a post request to server to add a username to the specified group/channel combos users array
     in group storage on the server */
     interface message {
-      message:String;
+      message:string;
     };
 
     this.http.post<message>('http://localhost:3000/api/adduser', {user: this.user, groupname: this.groupname, channelname: this.channelname, username: this.username}).subscribe(res => { 
@@ -80,7 +80,7 @@ export class ChatComponent implements OnInit {
   removeUser() {
     /* removeUser function will send a post request to server to remove a username to the specified group/channel comobos users array in group storage on the server */
     interface message {
-      message:String;
+      message:string;
     };
 
     this.http.post<message>('http://localhost:3000/api/removeuser', {user: this.user, groupname: this.groupname, channelname: this.channelname, username: this.username}).subscribe(res => { 

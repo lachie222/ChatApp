@@ -7,7 +7,6 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         } else {
-            req.body.user = JSON.parse(req.body.user);
             username = req.body.user.username;
             location = {groupname: req.body.groupname, channelname: req.body.channelname};
             chatmessage = req.body.message;
@@ -21,8 +20,8 @@ module.exports = function(app) {
                         chat = Object.assign(new Chat(), chat);
                         chat.addMessage(username, chatmessage)
                         fs.writeFileSync('./app_modules/group/chathistory.json', JSON.stringify(chatdata, null, 2));
-                        message = {message:"Message Successfully Created"}
-                        res.send(message);
+                        message = "Message Successfully Created"
+                        res.send({message: message});
                     }
                 });
             }); 
@@ -41,7 +40,7 @@ module.exports = function(app) {
                 chatdata = JSON.parse(data);
                 for(i=0; i<chatdata.chats.length; i++) {
                     if(chatdata.chats[i].location.groupname == location.groupname && chatdata.chats[i].location.channelname == location.channelname) {
-                        message = "Chat room successfully joined";
+                        message = 'Chat room successfully joined';
                         res.send({message: message, chatdata: chatdata.chats[i].chatdata});
                     }
                 }

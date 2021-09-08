@@ -1,5 +1,4 @@
 var fs = require('fs');
-const group = require('../group/group');
 
 module.exports = function(app) {
     app.post('/api/fetchgroups',function(req,res){

@@ -1,9 +1,9 @@
 {
   "users": [
     {
-      "username": "john52",
+      "username": "superadmin",
       "password": "abc123",
-      "email": "john52@gmail.com",
+      "email": "super@gmail.com",
       "id": 0,
       "role": "superadmin"
     }

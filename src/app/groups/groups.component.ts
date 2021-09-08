@@ -30,7 +30,7 @@ export class GroupsComponent implements OnInit {
     as params and store it in server storage, response message will indicate success. Groups will be refreshed using
     fetchGroups once complete. */
     interface message {
-      message:String;
+      message:string;
     };
 
     this.http.post<message>('http://localhost:3000/api/createchannel', {user: this.fetchDataService.user, groupname: this.groupselect, channelname: this.channelname}).subscribe(res => { 
@@ -45,7 +45,7 @@ export class GroupsComponent implements OnInit {
     as params and remove it from server storage, response message will indicate success. Groups will be refreshed using
     fetchGroups once complete. */
     interface message {
-      message:String;
+      message:string;
     };
 
     this.http.post<message>('http://localhost:3000/api/removechannel', {user: this.fetchDataService.user, groupname: this.groupselect, channelname: this.channelname}).subscribe(res => { 
