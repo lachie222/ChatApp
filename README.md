@@ -37,9 +37,9 @@ Angular Architecture:
 
 Components:
 
-Login Component: The login component is loaded at the root of the application, and represents all the logic and html required to send a login/authentication request or registration to the server. 
+Login Component: The login component is loaded at the root of the application, and represents all the logic and html required to send a login/authentication request to the server. 
 
-Control Panel Component: The control panel component represents all the logic and html required to perform admin functions such as creating/deleting groups, promoting users, etc.
+Control Panel Component: The control panel component represents all the logic and html required to perform admin functions such as creating/deleting groups and users, promoting users, etc.
 
 Groups Component: The groups component represents all the logic and html required to display the users' available groups and channels as a list. This component also contains a form only visible to admins or group assis' to create/remove channels.
 
@@ -76,6 +76,8 @@ Functions:
 app.post('/api/auth') -> used for authenticating users,
 
 app.post('/api/register')-> used for registering a new user,
+
+app.post('/api/deleteacc)->used for deleting a user,
 
 assignID()-> used to automatically assign each user in the JSON storage a unique ID number
 
