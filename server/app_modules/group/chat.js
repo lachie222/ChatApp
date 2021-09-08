@@ -1,7 +1,11 @@
+/*Defines the methods and properties for a chat object */
 module.exports = class Chat {
-    constructor(channelname, username, message) {
-        this.channelname = channelname;
-        this.username = username;
-        this.message = message;
+    constructor(groupname, channelname) {
+        this.location = {groupname, channelname};
+        this.chatdata = [];
+    }
+
+    addMessage(username, message) {
+        this.chatdata.push({username, message})
     }
 };

@@ -1,3 +1,4 @@
+/*Defines the properties for a User object */
 module.exports = class User {
 
     constructor(username, password, email, id, role) {

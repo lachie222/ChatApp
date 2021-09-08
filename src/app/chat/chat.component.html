@@ -1,0 +1,25 @@
+<p>{{groupname}}</p>
+<p>{{channelname}}</p>
+
+
+<div class="chatbox">
+    <ul class="list-group">
+        <li class="list-group-item" *ngFor="let chat of chatdata">{{chat.username}}: {{chat.message}}</li>
+    </ul>
+</div>
+<form class="mb-5">
+    <div class="form-group">
+        <label for="groupInput1">Message:</label>
+        <input type="text" [(ngModel)]="message" name="message" class="form-control" id="groupInput1" placeholder="Enter Message">
+    </div>
+    <button type="submit" class="btn btn-primary mt-2" (click)="createMessage()">Create</button>
+</form>
+
+<form class="mb-5">
+<div class="form-group">
+    <label for="usernameInput1">Username:</label>
+    <input type="text" [(ngModel)]="username" name="username" class="form-control" id="usernameInput1" placeholder="Enter Username">
+</div>
+<button type="submit" class="btn btn-primary mt-2" (click)="addUser()">Invite</button>
+<button type="submit" class="btn btn-primary mt-2" (click)="removeUser()">Remove</button>
+</form>

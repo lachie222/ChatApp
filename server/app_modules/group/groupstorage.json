@@ -1,31 +1,13 @@
 {
   "groups": [
     {
-      "groupname": "group 55",
+      "groupname": "new group",
       "channels": [
         {
-          "channelname": "channel 1",
-          "users": []
-        },
-        {
-          "channelname": "channel 2",
-          "users": []
-        }
-      ],
-      "groupassis": [
-        "mike22"
-      ]
-    },
-    {
-      "groupname": "group 77",
-      "channels": [
-        {
-          "channelname": "channel 4",
-          "users": []
-        },
-        {
-          "channelname": "channel 5",
-          "users": []
+          "channelname": "new channel",
+          "users": [
+            "terry"
+          ]
         }
       ],
       "groupassis": []

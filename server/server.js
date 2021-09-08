@@ -17,22 +17,6 @@ var server = http.listen(3000, function() {
 });
 
 require('./app_modules/auth/auth.js')(app);
+require('./app_modules/auth/fetchgroups.js')(app);
 require('./app_modules/group/groupfunction.js')(app);
-
-var fs = require('fs');
-
-newuser = {            
-    "id": 5,
-    "username": "aiden76",
-    "password": "abc1236",
-    "email": "aiden@gmail.com",
-    "role": "user"
-}
-
-/*fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-    if (err) throw err;
-    let userdata = JSON.parse(data);
-    userdata.users.push(newuser);
-    fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-    ;
-});*/
+require('./app_modules/group/chatfunction.js')(app);

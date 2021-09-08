@@ -1,8 +1,16 @@
 {
-    "channels": [
+  "chats": [
+    {
+      "location": {
+        "groupname": "new group",
+        "channelname": "new channel"
+      },
+      "chatdata": [
         {
-            "channelname": "channel1",
-            "chathistory": []
+          "username": "john52",
+          "message": "hello"
         }
-    ]
+      ]
+    }
+  ]
 }

@@ -1,8 +1,27 @@
 <h1>Groups: </h1>
-<div *ngFor="let group of groups">
+<div *ngFor="let group of groupdata">
     <h2>{{group.groupname}}:</h2>
     <ul>
-        <li *ngFor="let channel of group.channels"><a href=''>{{channel.channelname}}</a></li>
+        <li *ngFor="let channel of group.channels"><a [routerLink] = "['/chat/', group.groupname, channel.channelname]">{{channel.channelname}}</a></li>
     </ul>
 </div>
-<div>
+
+
+<div *ngIf="isGroupAssis">
+    <h1>Add/Remove Channel:</h1>
+    <form class="mb-5">
+        <div class="form-group">
+            <label for="groupInput2">Group:</label>
+            <select class="form-control" id="groupInput2" name="groupselect" [(ngModel)]="groupselect">
+                <option value="" selected disabled hidden>Select a Group</option>
+                <option *ngFor="let group of groupAssis">{{group.groupname}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="channelInput">Channel Name:</label>
+            <input type="text" [(ngModel)]="channelname" name="channelname" class="form-control" id="channelInput" placeholder="Enter Channel Name">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2" (click)="createChannel()">Create</button>
+        <button type="submit" class="btn btn-primary mt-2" (click)="removeChannel()">Remove</button>
+    </form>
+</div>

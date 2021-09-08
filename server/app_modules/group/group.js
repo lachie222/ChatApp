@@ -1,3 +1,4 @@
+/*Defines the methods and properties for a Group and Channel object */
 class Group {
     constructor(groupname) {
         this.groupname = groupname;

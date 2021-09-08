@@ -19,14 +19,14 @@
       "password": "abc12345",
       "email": "ben88@gmail.com",
       "id": 2,
-      "role": "groupassis"
+      "role": "user"
     },
     {
       "username": "mike22",
-      "password": "abc1236",
+      "password": "123",
       "email": "mike22@gmail.com",
       "id": 3,
-      "role": "groupadmin"
+      "role": "user"
     }
   ]
 }

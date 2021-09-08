@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FetchdataService } from '../fetchdata.service';
 import { Router } from '@angular/router';
+import { FetchdataService } from '../fetchdata.service';
 
 @Component({
   selector: 'app-controlpanel',
@@ -10,190 +10,105 @@ import { Router } from '@angular/router';
 })
 export class ControlpanelComponent implements OnInit {
 
-  constructor(private http:HttpClient, private FetchdataService:FetchdataService, private router:Router) {
+  constructor(private http:HttpClient, private router:Router, private fetchDataService:FetchdataService) {
   }
 
-  user = sessionStorage.getItem('user');
-  groupdata = JSON.parse(sessionStorage.getItem('groups')!);
-  groups = this.groupdata.groups;
-  channels = this.groups.channels;
+  groupdata = this.fetchDataService.groupdata;
+  user = this.fetchDataService.user;
   groupname:String = "";
-  groupselect:String= "";
-  groupselect2:String="";
-  groupselect3:String="";
-  channelselect:String="";
-  channelname:String= "";
-  username:String = "";
+  groupselect:String="";
+  username1:String = "";
   username2:String = "";
-  username3:String = "";
-  grouprequest = {};
-  channelrequest = {};
-  userrequest = {};
-  promoterequest = {};
-  promotega = {};
+  role:String = "";
+  isSuper = false;
   i = 0;
 
   ngOnInit(): void {
-    //this.FetchdataService.getGroups();
+    /*Upon initialisation, the component will fetch groups using user details stored in session storage 
+    and then check the role of user */
+    this.fetchDataService.fetchGroups();
+    this.checkRole();
   }
 
-  reloadComponent() {
-    let currentUrl = this.router.url;
-        this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-        this.router.onSameUrlNavigation = 'reload';
-        this.router.navigate([currentUrl]);
-  };
-
-  select() {
-    for (this.i=0; this.i<this.groups.length; this.i++) {
-      if(this.groupselect2 == this.groups[this.i].groupname) {
-        this.channels = this.groups[this.i].channels;
+  checkRole() {
+    /*Check role function will check the role of the user to see if they are superadmin, If the user is a superadmin,
+    ngIf will be set to true, which will create the promote to superadmin button in html (since only super admins can promote)
+    users to superadmin */
+    if(this.user !== null) {
+      this.role = this.user.role
+      if(this.role == 'superadmin') {
+        this.isSuper = true;
       }
     }
-  };
+  }
+
 
   createGroup() {
+    /* Create group function will send a post request to server to create a new group with groupname param
+     and store it in groupstorage, response message will indicate success in console and groups will be refreshed by calling
+     fetchGroups() */
     interface message {
-      groupdata:Object;
       message:String;
     };
 
-    this.grouprequest = {user: this.user, groupname: this.groupname};
-    this.http.post<message>('http://localhost:3000/api/creategroup', this.grouprequest).subscribe(res => { 
+    this.http.post<message>('http://localhost:3000/api/creategroup', {user:this.user, groupname:this.groupname}).subscribe(res => { 
         alert(res.message);
-        console.log(res);
-        sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-        setTimeout(() => {
-          this.reloadComponent();
-      }, 1000);
+        this.groupname = '';
+        this.fetchDataService.fetchGroups();
     });
   };
 
   removeGroup() {
+    /* removeGroup function will send a post request to server to remove a group with groupname param from groupstorage,
+    response will indicate success and groups will be refreshed by calling fetchGroups() */
     interface message {
-      groupdata:Object;
       message:String;
     };
 
-    this.grouprequest = {user: this.user, groupname: this.groupname};
-    this.http.post<message>('http://localhost:3000/api/removegroup', this.grouprequest).subscribe(res => { 
+    this.http.post<message>('http://localhost:3000/api/removegroup', {user:this.user, groupname:this.groupname}).subscribe(res => { 
         alert(res.message);
-        console.log(res);
-        sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-        setTimeout(() => {
-          this.reloadComponent();
-      }, 1000);
-    });
-  };
-
-  createChannel() {
-    interface message {
-      groupdata:Object;
-      message:String;
-    };
-
-    this.channelrequest = {user: this.user, groupname: this.groupselect, channelname: this.channelname};
-    this.http.post<message>('http://localhost:3000/api/createchannel', this.channelrequest).subscribe(res => { 
-        alert(res.message);
-        sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-        setTimeout(() => {
-          this.reloadComponent();
-      }, 1000);
-    });
-  };
-
-  removeChannel() {
-    interface message {
-      groupdata:Object;
-      message:String;
-    };
-
-    this.channelrequest = {user: this.user, groupname: this.groupselect, channelname: this.channelname};
-    this.http.post<message>('http://localhost:3000/api/removechannel', this.channelrequest).subscribe(res => { 
-        alert(res.message);
-        console.log(res);
-        sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-        setTimeout(() => {
-          this.reloadComponent();
-      }, 1000);
-    });
-  };
-
-  addUser() {
-    interface message {
-      groupdata:Object;
-      message:String;
-    };
-
-    this.userrequest = {user: this.user, groupname: this.groupselect2, channelname: this.channelselect, username: this.username};
-    console.log(this.channelselect);
-    this.http.post<message>('http://localhost:3000/api/adduser', this.userrequest).subscribe(res => { 
-        alert(res.message);
-        sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-        setTimeout(() => {
-          this.reloadComponent();
-      }, 1000);
-    });
-  };
-
-  removeUser() {
-    interface message {
-      groupdata:Object;
-      message:String;
-    };
-
-    this.userrequest = {user: this.user, groupname: this.groupselect2, channelname: this.channelselect, username: this.username};
-    console.log(this.channelselect);
-    this.http.post<message>('http://localhost:3000/api/removeuser', this.userrequest).subscribe(res => { 
-        alert(res.message);
-        sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-        setTimeout(() => {
-          this.reloadComponent();
-      }, 1000);
+        this.groupname = '';
+        this.fetchDataService.fetchGroups();
     });
   };
 
   promoteSuper() {
+    /* promoteSuper function will send a post request to server to promote a user's role to superadmin and then update userstorage, message will indicate success in console */
     interface message {
       message:String;
     };
 
-    this.promoterequest = {user: this.user, username: this.username3}
-    this.http.post<message>('http://localhost:3000/api/promotesuper', this.promoterequest).subscribe(res => { 
+    this.http.post<message>('http://localhost:3000/api/promotesuper', {user:this.user, username:this.username2}).subscribe(res => { 
       alert(res.message);
-      setTimeout(() => {
-        this.reloadComponent();
-    }, 1000);
+      this.username2 = '';
+      this.fetchDataService.fetchGroups();
   });
   }
 
   promoteGroupAdmin() {
+    /* promoteGroupAdmin function will send a post request to server to promote a user's role to group admin and then update userstorage, message will indicate success in console */
     interface message {
       message:String;
     };
 
-    this.promoterequest = {user: this.user, username: this.username3}
-    this.http.post<message>('http://localhost:3000/api/promotegroupadmin', this.promoterequest).subscribe(res => { 
+    this.http.post<message>('http://localhost:3000/api/promotegroupadmin', {user:this.user, username:this.username2}).subscribe(res => { 
       alert(res.message);
-      setTimeout(() => {
-        this.reloadComponent();
-    }, 1000);
+      this.username2 = '';
+      this.fetchDataService.fetchGroups();
   });
   }
 
   promoteGroupAssis() {
+    /* promoteGroupAssis function will send a post request to server to add a username to a specified groups groupassis
+    array, thus making the user a groupassis of a group. message will indicate success in console */
     interface message {
-      groupdata:Object;
       message:String;
     };
 
-    this.promotega = {user: this.user, username: this.username2, groupname: this.groupselect3}
-    this.http.post<message>('http://localhost:3000/api/promotegroupassis', this.promotega).subscribe(res => { 
+    this.http.post<message>('http://localhost:3000/api/promotegroupassis', {user:this.user, username:this.username1, groupname:this.groupselect}).subscribe(res => { 
       alert(res.message);
-      sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-      setTimeout(() => {
-        this.reloadComponent();
-    }, 1000);
+      this.username1 = '';
+      this.fetchDataService.fetchGroups();
   });
   }
 

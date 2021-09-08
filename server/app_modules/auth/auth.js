@@ -2,77 +2,55 @@ var User = require('../user/user.js');
 var fs = require('fs');
 
 module.exports = function(app) {
-    //app parses in the express object needed to check credentials
-    // it then checks the form request against an array of users, if a match is found it will
-    // return customer.ok as true
     app.post('/api/auth',function(req,res){
+        /*auth request checks request body which is an object containing a username and password*/
         if (!req.body) {
             return res.sendStatus(400)
         }
-        console.log(req.body);
-        
-        user = {
-            username:String,
-            email:String,
-            password:String,
-            role:String,
-            valid:Boolean
-        };
 
        fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
+           /*If the request body username and password matches one found in userstorage,
+           user will have a validated property and the remaining data will be sent back to the user, otherwise an error message will be sent */
             if (err) throw err;
             let userdata = JSON.parse(data);
             users = userdata.users;
-            user.username = req.body.username;
-            user.password = req.body.password;
+            username = req.body.username;
+            password = req.body.password;
         
             for (let i=0; i<users.length; i++){
-                if (user.username == users[i].username && user.password == users[i].password){
+                if (username == users[i].username && password == users[i].password){
                     user = users[i];
                     user.valid = true;
+                    role = user.role;
                     message = "Successful Login";
-                    console.log("USER VALIDATED");
-                    fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
-                        if (err) throw err;
-                        groupdata = JSON.parse(data);
-                        res.send({user: user, msg: message, groupdata})
-                    });
-                    break
+                    res.send({message: message, user})
+                    break;
                 }else{
                     user.valid = false;
                 }
             };
     
             if (user.valid == false) {
-                console.log("USER INVALID");
-                msg = "Wrong username or Password";
-                res.send({msg: msg, user: {valid: false}});
+                message = "Wrong username or Password";
+                res.send({message: message, user: {valid: false}});
             }
-
-
         })
     });
 
     app.post('/api/register',function(req,res){
+        /* Register request will create a new user entry based on user email, username and password */
         if (!req.body) {
             return res.sendStatus(400)
         }
-        console.log(req.body);
-        
-        user = {
-            username:String,
-            email:String,
-            password:String,
-            role:String,
-            valid:Boolean
-        };
 
         user.email = req.body.email;
         user.username = req.body.username;
         user.password = req.body.password;
-        let validrequest = false;
+        validrequest = false;
 
        fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
+           /*will check if req email or username is already taken, if so, return an error,
+           if not, create the new user and store in storage */
             if (err) throw err;
             let userdata = JSON.parse(data);
             users = userdata.users;
@@ -104,6 +82,8 @@ module.exports = function(app) {
     });
 
     function assignID() {
+        /*Assign ID function will automatically assign an incrementing unique ID to each user in
+        userstorage */
         fs.readFile('./app_modules/user/userstorage.json', (err,data) => {
             if(err) throw err;
             let userdata = JSON.parse(data);
@@ -114,24 +94,5 @@ module.exports = function(app) {
             fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
         })
     }
-
-    /*function returnUser(username) {
-        let userreturn = {};
-        fs.readFile('./app_modules/user/userstorage.json', (err,data) => {
-            if(err) throw err;
-            let userdata = JSON.parse(data);
-            users = userdata.users;
-            for (let i=0; i<users.length; i++) {
-                console.log(username);
-                console.log(users[i].username);
-                if (username == users[i].username) {
-                    users[i].valid = true;
-                    console.log('match found');
-                    userreturn = users[i];
-                }
-            }
-        }); 
-        return userreturn;
-    }*/
     
 }
