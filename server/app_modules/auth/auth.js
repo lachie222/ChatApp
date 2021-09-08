@@ -15,6 +15,11 @@ module.exports = function(app) {
             users = userdata.users;
             username = req.body.username;
             password = req.body.password;
+            user = {
+                username:String,
+                password:String,
+                valid:Boolean
+            };
         
             for (let i=0; i<users.length; i++){
                 if (username == users[i].username && password == users[i].password){
@@ -41,42 +46,81 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         }
-
-        user.email = req.body.email;
-        user.username = req.body.username;
-        user.password = req.body.password;
-        validrequest = false;
-
-       fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-           /*will check if req email or username is already taken, if so, return an error,
-           if not, create the new user and store in storage */
-            if (err) throw err;
-            let userdata = JSON.parse(data);
-            users = userdata.users;
-            for (let i=0; i<users.length; i++){
-                if (user.username == users[i].username){
-                    validrequest = false;
-                    message = "Username already taken!";
-                    res.send({message: message});
-                    break;
-                }else if (user.email == users[i].email){
-                    validrequest = false;
-                    message = "Email already taken!";
-                    res.send({message: message});
-                    break;
-                }else {
-                    validrequest = true;
+        if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
+            user.email = req.body.email;
+            user.username = req.body.username;
+            user.password = req.body.password;
+            validrequest = false;
+    
+           fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
+               /*will check if req email or username is already taken, if so, return an error,
+               if not, create the new user and store in storage */
+                if (err) throw err;
+                let userdata = JSON.parse(data);
+                users = userdata.users;
+                for (let i=0; i<users.length; i++){
+                    if (user.username == users[i].username){
+                        validrequest = false;
+                        message = "Username already taken!";
+                        res.send({message: message});
+                        break;
+                    }else if (user.email == users[i].email){
+                        validrequest = false;
+                        message = "Email already taken!";
+                        res.send({message: message});
+                        break;
+                    }else {
+                        validrequest = true;
+                    }
                 }
-            }
-            if (validrequest == true) {
-                newuser = new User(user.username, user.password, user.email, '', 'user');
-                users.push(newuser);
-                fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-                assignID();
-                message = 'User Successfully Created, Please login';
+                if (validrequest == true) {
+                    newuser = new User(user.username, user.password, user.email, '', 'user');
+                    users.push(newuser);
+                    fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
+                    assignID();
+                    message = 'Account Successfully Created';
+                    res.send({message: message});
+                }
+            });
+        }else {
+            message = 'Incorrect Role!';
+            res.send({message: message})
+        }
+
+
+    });
+
+    app.post('/api/deleteacc',function(req,res){
+        /* Delete request will delete a user based on req username */
+        if (!req.body) {
+            return res.sendStatus(400)
+        }
+        if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
+            user.username = req.body.username;
+    
+           fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
+               /*will check if user exists, and delete if they do, or send error if they don't */
+                if (err) throw err;
+                let userdata = JSON.parse(data);
+                users = userdata.users;
+                for (let i=0; i<users.length; i++){
+                    if (user.username == users[i].username){
+                        users.splice(i, 1);
+                        fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
+                        assignID();
+                        message = "User deleted";
+                        break;
+                    }else{
+                        message = "User does not exist";
+                    }
+                }
                 res.send({message: message});
-            }
-        });
+            });
+        }else{
+            message = 'Incorrect Role!';
+            res.send({message: message})
+        }
+
 
     });
 

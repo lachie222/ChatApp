@@ -12,9 +12,6 @@ export class LoginComponent implements OnInit {
 
   usernamelogin:string="";
   passwordlogin:string="";
-  usercreate:string="";
-  passcreate:string="";
-  emailcreate:string="";
   user = {};
 
   constructor(private router: Router, private http:HttpClient, private appcomponent:AppComponent) { }
@@ -60,18 +57,4 @@ export class LoginComponent implements OnInit {
     });
   };
 
-  register() {
-    /*Register user function will send a post request to create a new user using email, username and password.
-    response will indicate if registration was successful. */
-    interface usermessage {
-      message:String;
-    }
-
-    this.http.post<usermessage>('http://localhost:3000/api/register', {email: this.emailcreate, username: this.usercreate, password: this.passcreate}).subscribe(res => { 
-        alert(res.message);
-        this.emailcreate='';
-        this.usercreate='';
-        this.passcreate='';
-    });
-  }
 }

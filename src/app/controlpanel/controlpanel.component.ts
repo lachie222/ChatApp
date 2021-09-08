@@ -19,6 +19,10 @@ export class ControlpanelComponent implements OnInit {
   groupselect:String="";
   username1:String = "";
   username2:String = "";
+  username3:String ="";
+  usercreate:string="";
+  passcreate:string="";
+  emailcreate:string="";
   role:String = "";
   isSuper = false;
   i = 0;
@@ -28,6 +32,34 @@ export class ControlpanelComponent implements OnInit {
     and then check the role of user */
     this.fetchDataService.fetchGroups();
     this.checkRole();
+  }
+
+  register() {
+    /*Register user function will send a post request to create a new user using email, username and password.
+    response will indicate if registration was successful. */
+    interface usermessage {
+      message:String;
+    }
+
+    this.http.post<usermessage>('http://localhost:3000/api/register', {user:this.user, email: this.emailcreate, username: this.usercreate, password: this.passcreate}).subscribe(res => { 
+        alert(res.message);
+        this.emailcreate='';
+        this.usercreate='';
+        this.passcreate='';
+    });
+  }
+
+  deleteacc() {
+    /*Register user function will send a post request to delete a user by their username
+    response will indicate if deletion was successful. */
+    interface usermessage {
+      message:String;
+    }
+
+    this.http.post<usermessage>('http://localhost:3000/api/deleteacc', {user:this.user, username: this.username3}).subscribe(res => { 
+        alert(res.message);
+        this.username3='';
+    });
   }
 
   checkRole() {

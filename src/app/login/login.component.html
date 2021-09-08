@@ -10,20 +10,3 @@
     </div>
     <button type="submit" (click)="login()" class="btn btn-primary mt-2">Submit</button>
 </form>
-
-<h2>Create an Account:</h2>
-<form>
-    <div class="form-group">
-        <label for="emailInput">Email</label>
-        <input type="email" [(ngModel)]="emailcreate" name="emailcreate" class="form-control" id="emailInput" placeholder="Enter Email">
-    </div>
-    <div class="form-group">
-      <label for="usernameInput2">Username</label>
-      <input type="text" [(ngModel)]="usercreate" name="usercreate" class="form-control" id="usernameInput2" placeholder="Enter Username">
-    </div>
-    <div class="form-group">
-      <label for="passwordInput2">Password</label>
-      <input type="password" [(ngModel)]="passcreate" name="passcreate" class="form-control" id="passwordInput2" placeholder="Password">
-    </div>
-    <button type="submit" (click)="register()" class="btn btn-primary mt-2">Submit</button>
-</form>
