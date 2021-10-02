@@ -1,4 +1,11 @@
 {
   "chats": [
+    {
+      "location": {
+        "groupname": "group 1",
+        "channelname": "channel 1"
+      },
+      "chatdata": []
+    }
   ]
 }

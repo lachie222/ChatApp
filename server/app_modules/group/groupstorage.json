@@ -1,3 +1,14 @@
 {
-  "groups": []
+  "groups": [
+    {
+      "groupname": "group 1",
+      "channels": [
+        {
+          "channelname": "channel 1",
+          "users": []
+        }
+      ],
+      "groupassis": []
+    }
+  ]
 }

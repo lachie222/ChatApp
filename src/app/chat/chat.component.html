@@ -4,7 +4,7 @@
 
 <div class="chatbox">
     <ul class="list-group">
-        <li class="list-group-item" *ngFor="let chat of chatdata">{{chat.username}}: {{chat.message}}</li>
+        <li class="list-group-item" *ngFor="let message of messages">{{message.username}}: {{message.message}}</li>
     </ul>
 </div>
 <form class="mb-5">
@@ -12,7 +12,7 @@
         <label for="groupInput1">Message:</label>
         <input type="text" [(ngModel)]="message" name="message" class="form-control" id="groupInput1" placeholder="Enter Message">
     </div>
-    <button type="submit" class="btn btn-primary mt-2" (click)="createMessage()">Create</button>
+    <button type="submit" class="btn btn-primary mt-2" (click)="chat()">Create</button>
 </form>
 
 <form class="mb-5">

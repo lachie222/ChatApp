@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ChatService } from './chat.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ import { Router } from '@angular/router';
 export class AppComponent implements OnInit {
   title = 'chatapp';
 
-  constructor(private route:Router) { }
+  constructor(private route:Router, private ChatService: ChatService) { }
   isAdmin = false;
   isValid = false;
   user = JSON.parse(sessionStorage.getItem('user')!);
@@ -43,6 +44,10 @@ export class AppComponent implements OnInit {
     }
   }
 
+  disconnect() {
+    this.ChatService.disconnect(this.user.username);
+  }
+
   logout() {
     /*Logout button will clear the navbar states and clear user and group information from session storage, and return to the
     login page */
@@ -51,5 +56,6 @@ export class AppComponent implements OnInit {
     this.isValid = false;
     this.route.navigateByUrl("/")
   }
+
 
 }

@@ -11,10 +11,39 @@ app.use(express.json());
 app.use(express.static(__dirname + '/../dist/chatapp'));
 console.log(__dirname);
 
-var http = require('http').Server(app);
-var server = http.listen(3000, function() {
-    console.log("Server listening on port: 3000")
+let http = require('http');
+let server = http.Server(app);
+
+const io = require("socket.io")(server, {
+    cors: {
+        origin: "http://localhost:4200",
+        methods: ["GET", "POST"]
+    }
 });
+
+
+const PORT = 3000;
+
+// sockets.connect(io, PORT);
+
+io.on('connection', (socket) => {
+    console.log('user connection on port '+ PORT + ':' + socket.id);
+
+    socket.on('message', (message)=> {
+        io.emit('message', message);
+    });
+
+    socket.on('disconnect', ()=> {
+        console.log('User has disconnected: ' + socket.id);
+        socket.disconnect();
+    })
+});
+// listen.listen(app, PORT);
+server.listen(PORT, () => {
+    console.log('started on port:' +PORT);
+});
+
+
 
 require('./app_modules/auth/auth.js')(app);
 require('./app_modules/auth/fetchgroups.js')(app);

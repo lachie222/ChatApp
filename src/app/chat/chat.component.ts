@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { ChatService } from '../chat.service';
 
 /* interface for chatdata will assign properties to be examined by ngFor in html */
 export interface ChatData {
-  username: String;
-  message: String;
+  username: string;
+  message: string;
 };
 
 @Component({
@@ -17,16 +18,18 @@ export interface ChatData {
 
 export class ChatComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { 
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router, private ChatService: ChatService) { 
   }
 
 
   user = JSON.parse(sessionStorage.getItem('user')!);
-  chatdata:Array<ChatData> = [];
-  groupname:String="";
-  username:String="";
-  channelname:String="";
-  message:String = "";
+  groupname:string="";
+  username:string="";
+  channelname:string="";
+  message:string = "";
+  chatdata:ChatData = {username: this.user, message: this.message};
+  ioConnection:any;
+  messages:Array<ChatData> = [];
 
   ngOnInit(): void {
 
@@ -34,12 +37,14 @@ export class ChatComponent implements OnInit {
     Chat data will then be received using these variables as input*/
     this.groupname = this.route.snapshot.params.group;
     this.channelname = this.route.snapshot.params.channel;
-    this.retrieveChat(this.groupname, this.channelname);
+    //this.retrieveChat(this.groupname, this.channelname);
+    this.ChatService.connect(this.user.username);
+    this.initIoConnection()
   }
 
-  retrieveChat(groupname:String, channelname:String) {
+  /*retrieveChat(groupname:String, channelname:String) {
     /* Retrievechat function sends post request to server to retrieve chat history with groupname and channel name as params.
-    Chat is then stored in the chatdata variable so it can be displayed in html via data binding*/
+    Chat is then stored in the chatdata variable so it can be displayed in html via data binding
     interface chatresponse {
       chatdata:Array<ChatData>;
       message:string;
@@ -49,10 +54,10 @@ export class ChatComponent implements OnInit {
         console.log(res.message);
         this.chatdata = res.chatdata;
     });
-  };
+  };*/
 
-  createMessage() {
-    /* createMessage function sends post request to server to create a new chat object and send it to chat history using username, groupname and channel name as params, once a message has been sent, the chat will refresh itself by calling retrievechat function and message box will be reset */
+  /*createMessage() {
+    /* createMessage function sends post request to server to create a new chat object and send it to chat history using username, groupname and channel name as params, once a message has been sent, the chat will refresh itself by calling retrievechat function and message box will be reset 
     interface message {
       message:string;
     };
@@ -62,7 +67,7 @@ export class ChatComponent implements OnInit {
         console.log(res.message);
         this.message = '';
     });
-  };
+  };*/
 
   addUser() {
     /* addUser function will send a post request to server to add a username to the specified group/channel combos users array
@@ -88,4 +93,22 @@ export class ChatComponent implements OnInit {
         this.username = '';
     });
   };
+
+  private initIoConnection() {
+    this.ioConnection = this.ChatService.onMessage()
+    .subscribe((chatdata:ChatData) => {
+      console.log(chatdata);
+      this.messages.push(chatdata);
+    })
+  }
+
+  chat() {
+    if(this.message) {
+      this.chatdata = {username: this.user.username, message: this.message};
+      this.ChatService.send(this.chatdata);
+      this.message='';
+    }else{
+      console.log("no message");
+    }
+  }
 }
