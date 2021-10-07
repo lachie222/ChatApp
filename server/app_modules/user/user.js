@@ -1,12 +1,12 @@
 /*Defines the properties for a User object */
 module.exports = class User {
 
-    constructor(username, password, email, id, role) {
+    constructor(username, password, email, _id, role) {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.id = id;
         this.role = role;
+        this._id = _id;
     }
 
 

@@ -77,7 +77,7 @@ module.exports = function(app) {
                     newuser = new User(user.username, user.password, user.email, '', 'user');
                     users.push(newuser);
                     fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-                    assignID();
+                    //assignID();
                     message = 'Account Successfully Created';
                     res.send({message: message});
                 }
@@ -107,7 +107,7 @@ module.exports = function(app) {
                     if (user.username == users[i].username){
                         users.splice(i, 1);
                         fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-                        assignID();
+                        //assignID();
                         message = "User deleted";
                         break;
                     }else{

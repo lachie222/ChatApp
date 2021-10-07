@@ -4,14 +4,12 @@
       "username": "superadmin",
       "password": "abc123",
       "email": "super@gmail.com",
-      "id": 0,
       "role": "superadmin"
     },
     {
       "username": "lachie222",
       "password": "abc123",
       "email": "lachlan222@live.com",
-      "id": 1,
       "role": "superadmin"
     }
   ]
