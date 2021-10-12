@@ -27,16 +27,24 @@ const PORT = 3000;
 // sockets.connect(io, PORT);
 
 io.on('connection', (socket) => {
-    console.log('user connection on port '+ PORT + ':' + socket.id);
+    //console.log('user connection on port '+ PORT + ':' + socket.id);
 
-    socket.on('message', (message)=> {
-        io.emit('message', message);
+    socket.on('join room', (username, roomName)=> {
+        socket.join(roomName);
+        //console.log('user has joined room'+ socket.id+ roomName);
+        socket.to(roomName).emit('message', {username: 'System', message: username + ' has joined the chat!'});
     });
 
-    socket.on('disconnect', ()=> {
-        console.log('User has disconnected: ' + socket.id);
+    socket.on('message', (message, roomName)=> {
+        socket.to(roomName).emit('message', message);
+    });
+
+    socket.on('leave', (username, roomName)=> {
+        //console.log(username + ' has left ' + roomName);
+        socket.to(roomName).emit('message', {username: 'System', message: username + ' has left the chat!'});
+        socket.leave(roomName);
         socket.disconnect();
-    })
+    });
 });
 // listen.listen(app, PORT);
 server.listen(PORT, () => {

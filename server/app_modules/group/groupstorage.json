@@ -6,6 +6,10 @@
         {
           "channelname": "channel 1",
           "users": []
+        },
+        {
+          "channelname": "channel2",
+          "users": []
         }
       ],
       "groupassis": []

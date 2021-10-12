@@ -18,7 +18,7 @@ export class FetchdataService {
 
   constructor(private http:HttpClient) { }
 
-  public user = JSON.parse(sessionStorage.getItem('user')!);
+  public user = JSON.parse(localStorage.getItem('user')!);
   public groupdata:Array<GroupData> = [];
   public isGroupAssis = false;
   public groupAssis:Array<GroupData> = [];
@@ -31,8 +31,8 @@ export class FetchdataService {
     }
 
     this.http.post<message>('http://localhost:3000/api/fetchgroups', this.user).subscribe(res => {
-      sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-      this.groupdata = (res.groupdata);
+      this.groupdata = res.groupdata;
+      localStorage.setItem('groups', JSON.stringify(res.groupdata));
     })
   }
 

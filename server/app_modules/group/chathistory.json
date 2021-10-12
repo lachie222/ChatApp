@@ -6,6 +6,13 @@
         "channelname": "channel 1"
       },
       "chatdata": []
+    },
+    {
+      "location": {
+        "groupname": "group 1",
+        "channelname": "channel2"
+      },
+      "chatdata": []
     }
   ]
 }

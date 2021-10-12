@@ -1,6 +1,9 @@
 var User = require('../user/user.js');
 var fs = require('fs');
 var db = require('../dbOps/app');
+const MongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017';
+const dbName = 'chatDB';
 
 module.exports = function(app) {
     app.post('/api/auth',function(req,res){
@@ -19,34 +22,27 @@ module.exports = function(app) {
         };
 
         processResult(query);
-    });
 
-       /*fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-           /*If the request body username and password matches one found in userstorage,
-           user will have a validated property and the remaining data will be sent back to the user, otherwise an error message will be sent 
+        /*let collection = query.collection;
+        let content = query.query;
+        MongoClient.connect(url, function(err, client) {
             if (err) throw err;
-
-
-        
-            for (let i=0; i<users.length; i++){
-                if (username == users[i].username && password == users[i].password){
-                    user = users[i];
-                    user.valid = true;
-                    role = user.role;
-                    message = "Successful Login";
-                    res.send(JSON.stringify({message: message, user}))
-                    break;
-                }else{
-                    user.valid = false;
+            let db = client.db(dbName);
+            console.log(query);
+            db.collection(collection).findOne(content, function(err, result) {
+                if (err) throw err; 
+                if(result) {
+                    if(content.username == result.username && content.password == result.password) {
+                        console.log(result);
+                        res.send({user:{id: result._id, username: result.username, role: result.role, valid: true}, message: 'Login Successful'})
+                    };
+                }else {
+                    res.send({user:{valid: false}, message:'Username/password is incorrect'})
                 }
-            };
-    
-            if (user.valid == false) {
-                message = "Wrong username or Password";
-                res.send({message: message, user: {valid: false}});
-            }
-        })
-    });*/
+                client.close();
+            });
+        });*/
+    });
 
     app.post('/api/register',function(req,res){
         /* Register request will create a new user entry based on user email, username and password */
@@ -130,19 +126,5 @@ module.exports = function(app) {
 
 
     });
-
-    function assignID() {
-        /*Assign ID function will automatically assign an incrementing unique ID to each user in
-        userstorage */
-        fs.readFile('./app_modules/user/userstorage.json', (err,data) => {
-            if(err) throw err;
-            userdata = JSON.parse(data);
-            users = userdata.users;
-            for (i=0; i<users.length; i++){
-                users[i].id = i;
-            };
-            fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-        })
-    }
     
 }

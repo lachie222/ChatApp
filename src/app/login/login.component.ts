@@ -12,11 +12,15 @@ export class LoginComponent implements OnInit {
 
   usernamelogin:string="";
   passwordlogin:string="";
+  userlogin = JSON.parse(localStorage.getItem('user')!);
   user = {};
 
   constructor(private router: Router, private http:HttpClient, private appcomponent:AppComponent) { }
 
   ngOnInit(): void {
+    if(this.userlogin) {
+      this.router.navigateByUrl('/groups');
+    }
   }
   
 
@@ -26,7 +30,7 @@ export class LoginComponent implements OnInit {
     for the user. If the users role is superadmin or groupadmin, the html button for the control panel will become visible on
     the navbar (as only these roles will have access to the forms inside). If user is not authenticated, it will alert the user that the username and password did not match */
     interface usermessage {
-      user:{valid:Boolean, role:String}
+      user:{valid:Boolean, username?:String, _id?:String, role?:String}
       message:String;
       groupdata?:Object;
     };
@@ -35,25 +39,22 @@ export class LoginComponent implements OnInit {
     this.http.post<usermessage>('http://localhost:3000/api/auth', {username: this.usernamelogin, password: this.passwordlogin}).subscribe(res => { 
       console.log(res)
       if (res.user.valid == true) {
-        sessionStorage.setItem('user', JSON.stringify(res.user));
-        this.user = JSON.parse(sessionStorage.getItem('user')!);
-        alert(res.message);
+        localStorage.setItem('user', JSON.stringify(res.user));
+        this.user = JSON.parse(localStorage.getItem('user')!);
+        console.log(this.user);
         this.usernamelogin = '';
         this.passwordlogin = '';
+        if(res.user.role == 'superadmin' || res.user.role == 'groupadmin') {
+          this.appcomponent.isAdmin = true;
+        };
 
         /*Custom fetchgroup function is used to account for latency. 3 second timeout ensures that server is able to respond in time before the component will navigate away */
         this.http.post<usermessage>('http://localhost:3000/api/fetchgroups', this.user).subscribe(res => {
-          sessionStorage.setItem('groups', JSON.stringify(res.groupdata));
-          setTimeout(()=> {
-            this.appcomponent.isValid = true;
-            if(res.user.role == 'superadmin' || res.user.role == 'groupadmin') {
-              this.appcomponent.isAdmin = true;
-            };
-            this.router.navigateByUrl('/groups');
-          }, 3000)
+          localStorage.setItem('groups', JSON.stringify(res.groupdata));
+          this.appcomponent.isValid = true;
+          this.router.navigateByUrl('/groups');
         })
       }
-      else {alert(res.message)} 
     });
   };
 

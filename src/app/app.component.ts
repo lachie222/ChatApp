@@ -13,7 +13,8 @@ export class AppComponent implements OnInit {
   constructor(private route:Router, private ChatService: ChatService) { }
   isAdmin = false;
   isValid = false;
-  user = JSON.parse(sessionStorage.getItem('user')!);
+  user = JSON.parse(localStorage.getItem('user')!);
+  roomName = JSON.parse(localStorage.getItem('roomName')!);
   role:String = '';
   valid:Boolean = false;
 
@@ -45,13 +46,17 @@ export class AppComponent implements OnInit {
   }
 
   disconnect() {
-    this.ChatService.disconnect(this.user.username);
+    this.user = JSON.parse(localStorage.getItem('user')!);
+    console.log(this.user);
+    this.roomName = JSON.parse(localStorage.getItem('roomName')!);
+    console.log(this.roomName);
+    this.ChatService.disconnect(this.user.username, this.roomName);
   }
 
   logout() {
     /*Logout button will clear the navbar states and clear user and group information from session storage, and return to the
     login page */
-    sessionStorage.clear();
+    localStorage.clear();
     this.isAdmin = false;
     this.isValid = false;
     this.route.navigateByUrl("/")

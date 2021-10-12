@@ -1,4 +1,7 @@
 var fs = require('fs');
+const MongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017';
+const dbName = 'chatDB';
 
 module.exports = function(app) {
     app.post('/api/fetchgroups',function(req,res){
@@ -8,16 +11,28 @@ module.exports = function(app) {
             return res.sendStatus(400)
         }
         role = req.body.role;
-        user.username = req.body.username;
+        username = req.body.username;
 
         if(role == 'superadmin' || role == 'groupadmin' || role == 'user') {
-            fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
+           
+           
+            MongoClient.connect(url, function(err, client) {
+                if (err) throw err;
+                let db = client.db(dbName);
+                db.collection('groups').find().toArray().then(function(docs) {
+                    res.send({message:'success', groupdata: docs});
+                }).catch((err) => {console.log(err);}).finally(() => {
+                    client.close();
+                });
+            });
+           
+            /*fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
                 if (err) throw err;
             groupdata = JSON.parse(data);
             groupdata = groupdata.groups;
-            res.send({user: user, message: message, groupdata})
-        });
-        }
+            res.send({groupdata})*/
+        };
+        
         
         //TEST code for trying to return specific groups for users/group assis
         /*else{

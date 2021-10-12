@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FetchdataService } from '../fetchdata.service';
+import { GroupData } from '../fetchdata.service';
 
 @Component({
   selector: 'app-groups',
@@ -11,7 +12,7 @@ export class GroupsComponent implements OnInit {
 
   constructor(private http:HttpClient, private fetchDataService:FetchdataService) { 
   }
-  groupdata = this.fetchDataService.groupdata;
+  groupdata:Array<GroupData> = this.fetchDataService.groupdata;
   groupAssis = this.fetchDataService.groupAssis;
   isGroupAssis = this.fetchDataService.isGroupAssis;
   groupname:String="";
@@ -23,6 +24,9 @@ export class GroupsComponent implements OnInit {
     /*Upon initialisation, groups will be fetched, and will check if user is a groupassis */
     this.fetchDataService.fetchGroups();
     this.fetchDataService.checkGroupAssis();
+    this.groupdata = this.fetchDataService.groupdata;
+    this.groupAssis = this.fetchDataService.groupAssis;
+    this.isGroupAssis = this.fetchDataService.isGroupAssis;
   }
 
   createChannel() {

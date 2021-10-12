@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, JsonpClientBackend } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ChatService } from '../chat.service';
 
@@ -22,11 +22,12 @@ export class ChatComponent implements OnInit {
   }
 
 
-  user = JSON.parse(sessionStorage.getItem('user')!);
+  user = JSON.parse(localStorage.getItem('user')!);
   groupname:string="";
   username:string="";
   channelname:string="";
   message:string = "";
+  roomName:string= "";
   chatdata:ChatData = {username: this.user, message: this.message};
   ioConnection:any;
   messages:Array<ChatData> = [];
@@ -37,8 +38,10 @@ export class ChatComponent implements OnInit {
     Chat data will then be received using these variables as input*/
     this.groupname = this.route.snapshot.params.group;
     this.channelname = this.route.snapshot.params.channel;
+    this.roomName = this.groupname+this.channelname;
+    localStorage.setItem('roomName', JSON.stringify(this.roomName));
     //this.retrieveChat(this.groupname, this.channelname);
-    this.ChatService.connect(this.user.username);
+    this.ChatService.connect(this.user.username, this.roomName);
     this.initIoConnection()
   }
 
@@ -105,7 +108,8 @@ export class ChatComponent implements OnInit {
   chat() {
     if(this.message) {
       this.chatdata = {username: this.user.username, message: this.message};
-      this.ChatService.send(this.chatdata);
+      this.ChatService.send(this.chatdata, this.roomName);
+      this.messages.push(this.chatdata);
       this.message='';
     }else{
       console.log("no message");
