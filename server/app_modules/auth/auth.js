@@ -1,5 +1,6 @@
 var User = require('../user/user.js');
 var fs = require('fs');
+var db = require('../dbOps/app');
 
 module.exports = function(app) {
     app.post('/api/auth',function(req,res){
@@ -7,19 +8,25 @@ module.exports = function(app) {
         if (!req.body) {
             return res.sendStatus(400)
         }
-       fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
+
+        username = req.body.username;
+        password = req.body.password;
+        query = {collection: 'users', query: {username: username, password: password}};
+
+        async function processResult(query) {
+            const result = await db.read(query);
+            return console.log(result);
+        };
+
+        processResult(query);
+    });
+
+       /*fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
            /*If the request body username and password matches one found in userstorage,
-           user will have a validated property and the remaining data will be sent back to the user, otherwise an error message will be sent */
+           user will have a validated property and the remaining data will be sent back to the user, otherwise an error message will be sent 
             if (err) throw err;
-            userdata = JSON.parse(data);
-            users = userdata.users;
-            username = req.body.username;
-            password = req.body.password;
-            user = {
-                username:String,
-                password:String,
-                valid:Boolean
-            };
+
+
         
             for (let i=0; i<users.length; i++){
                 if (username == users[i].username && password == users[i].password){
@@ -39,7 +46,7 @@ module.exports = function(app) {
                 res.send({message: message, user: {valid: false}});
             }
         })
-    });
+    });*/
 
     app.post('/api/register',function(req,res){
         /* Register request will create a new user entry based on user email, username and password */
