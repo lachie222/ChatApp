@@ -37,18 +37,15 @@ export class LoginComponent implements OnInit {
 
 
     this.http.post<usermessage>('http://localhost:3000/api/auth', {username: this.usernamelogin, password: this.passwordlogin}).subscribe(res => { 
-      console.log(res)
       if (res.user.valid == true) {
         localStorage.setItem('user', JSON.stringify(res.user));
         this.user = JSON.parse(localStorage.getItem('user')!);
-        console.log(this.user);
         this.usernamelogin = '';
         this.passwordlogin = '';
         if(res.user.role == 'superadmin' || res.user.role == 'groupadmin') {
           this.appcomponent.isAdmin = true;
         };
 
-        /*Custom fetchgroup function is used to account for latency. 3 second timeout ensures that server is able to respond in time before the component will navigate away */
         this.http.post<usermessage>('http://localhost:3000/api/fetchgroups', this.user).subscribe(res => {
           localStorage.setItem('groups', JSON.stringify(res.groupdata));
           this.appcomponent.isValid = true;

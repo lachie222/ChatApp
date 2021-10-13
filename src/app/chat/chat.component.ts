@@ -42,7 +42,7 @@ export class ChatComponent implements OnInit {
     this.roomName = {groupname: this.groupname, channelname: this.channelname};
     this.connection = {username: this.user.username, location: this.roomName};
     localStorage.setItem('roomName', JSON.stringify(this.roomName));
-    //this.retrieveChat(this.groupname, this.channelname);
+    /* Sockets are then connected and chat history is retrieved */
     this.ChatService.connect(this.connection);
     this.initIoConnection();
     this.retrieveChat();
@@ -50,7 +50,7 @@ export class ChatComponent implements OnInit {
 
   retrieveChat() {
     /* Retrievechat function sends post request to server to retrieve chat history with groupname and channel name as params.
-    Chat is then stored in the chatdata variable so it can be displayed in html via data binding*/
+    Chat is then stored in the messages array so it can be displayed in html via data binding*/
     interface chatresponse {
       chatdata:Array<ChatData>;
       message:string;
@@ -66,7 +66,7 @@ export class ChatComponent implements OnInit {
 
   addUser() {
     /* addUser function will send a post request to server to add a username to the specified group/channel combos users array
-    in group storage on the server */
+    in group database storage on the server */
     interface message {
       message:string;
     };
@@ -78,7 +78,7 @@ export class ChatComponent implements OnInit {
   };
 
   removeUser() {
-    /* removeUser function will send a post request to server to remove a username to the specified group/channel comobos users array in group storage on the server */
+    /* removeUser function will send a post request to server to remove a username to the specified group/channel comobos users array in group database storage on the server */
     interface message {
       message:string;
     };
@@ -90,21 +90,22 @@ export class ChatComponent implements OnInit {
   };
 
   private initIoConnection() {
+    /* will subscribe to chatdata observable and push every new message to the messages array for display in html */
     this.ioConnection = this.ChatService.onMessage()
     .subscribe((chatdata:ChatData) => {
-      console.log(chatdata);
       this.messages.push(chatdata);
     })
   }
 
   chat() {
+    /* Will send a message via the chatservice to the serverside socket containing chatdata and location */
     if(this.message) {
       this.chatdata = {username: this.user.username, message: this.message};
       this.ChatService.send({chatdata: this.chatdata, location: this.roomName});
       this.messages.push(this.chatdata);
       this.message='';
     }else{
-      console.log("no message");
+      alert("no message");
     }
   }
 }

@@ -31,7 +31,7 @@ export class GroupsComponent implements OnInit {
 
   createChannel() {
     /*create Channel function will send a post request to server to create a new channel with groupname and channelname
-    as params and store it in server storage, response message will indicate success. Groups will be refreshed using
+    as params and store it in server database storage, response message will indicate success. Groups will be refreshed using
     fetchGroups once complete. */
     interface message {
       message:string;
@@ -46,7 +46,7 @@ export class GroupsComponent implements OnInit {
 
   removeChannel() {
     /*create Channel function will send a post request to server to remove a channel with groupname and channelname
-    as params and remove it from server storage, response message will indicate success. Groups will be refreshed using
+    as params and remove it from server database storage, response message will indicate success. Groups will be refreshed using
     fetchGroups once complete. */
     interface message {
       message:string;

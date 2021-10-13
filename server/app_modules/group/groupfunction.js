@@ -9,7 +9,7 @@ const dbName = 'chatDB';
 module.exports = function(app) {
     app.post('/api/creategroup',function(req,res){
         /*create group request will create a new group based on
-        request params and store in groupstorage */
+        request params and store in database */
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -21,7 +21,6 @@ module.exports = function(app) {
                     let db = client.db(dbName);
                     let content = query.query;
                     let collection = query.collection;
-                    console.log(req.body);
                     if (err) throw err;
                     db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
                         if (result) {
@@ -43,8 +42,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/removegroup',function(req,res){
-        /*Remove group request will remove a group based on request params,
-        and then update group storage */
+        /*Remove group request will remove a group from the database based on request params */
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -75,7 +73,7 @@ module.exports = function(app) {
 
     app.post('/api/createchannel',function(req,res){
         /*create channel request will create a new channel based on req params,
-        and then update storage */
+        and then push it into the requested group and then update it on the database */
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -125,8 +123,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/removechannel',function(req,res){
-        /*Remove channel request will remove a channel based on req params,
-        and then update storage */
+        /*Remove channel request will remove a channel from a selected group and then update it in the database */
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -174,14 +171,11 @@ module.exports = function(app) {
     });
 
     app.post('/api/adduser',function(req,res){
-        /*adduser request will add a username to a req group/channel combo */
+        /*adduser request will add a username to a req group/channel combo and update the database*/
         if (!req.body) {
             return res.sendStatus(400)
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-                    /*will search through group storage and match groups/channel names,
-                    then will run addUser method to add a username into the channel,
-                    then update storage */
                     groupname = req.body.groupname;
                     channelname = req.body.channelname;
                     username = req.body.username;
@@ -233,7 +227,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/removeuser',function(req,res){
-        /*Remove user request will remove a user from req specified group/channel combo */
+        /*Remove user request will remove a user from req specified group/channel combo and update database*/
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -290,7 +284,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/promotesuper',function(req,res){
-        /*Promote super request will update a requested users role to superadmin */
+        /*Promote super request will update a requested users role to superadmin on the database */
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -319,7 +313,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/promotegroupadmin',function(req,res){
-        /*promote group admin will update a req users role to groupadmin */
+        /*promote group admin will update a req users role to groupadmin on the database*/
         if (!req.body) {
             return res.sendStatus(400)
         } else {
@@ -355,7 +349,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/promotegroupassis',function(req,res){
-        /* promote group assis will add a req username to the groupass array of a req group*/
+        /* promote group assis will add a req username to the groupass array of a req group and then update the database*/
         if (!req.body) {
             return res.sendStatus(400)
         } else {

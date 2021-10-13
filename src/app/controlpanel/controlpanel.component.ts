@@ -28,7 +28,7 @@ export class ControlpanelComponent implements OnInit {
   i = 0;
 
   ngOnInit(): void {
-    /*Upon initialisation, the component will fetch groups using user details stored in session storage 
+    /*Upon initialisation, the component will fetch groups using user details stored in local storage 
     and then check the role of user */
     this.fetchDataService.fetchGroups();
     this.checkRole();
@@ -77,7 +77,7 @@ export class ControlpanelComponent implements OnInit {
 
   createGroup() {
     /* Create group function will send a post request to server to create a new group with groupname param
-     and store it in groupstorage, response message will indicate success in console and groups will be refreshed by calling
+     and store it in the database, response message will indicate success and groups will be refreshed by calling
      fetchGroups() */
     interface message {
       message:String;
@@ -91,7 +91,7 @@ export class ControlpanelComponent implements OnInit {
   };
 
   removeGroup() {
-    /* removeGroup function will send a post request to server to remove a group with groupname param from groupstorage,
+    /* removeGroup function will send a post request to server to remove a group with groupname param from the database,
     response will indicate success and groups will be refreshed by calling fetchGroups() */
     interface message {
       message:String;
@@ -105,7 +105,7 @@ export class ControlpanelComponent implements OnInit {
   };
 
   promoteSuper() {
-    /* promoteSuper function will send a post request to server to promote a user's role to superadmin and then update userstorage, message will indicate success in console */
+    /* promoteSuper function will send a post request to server to promote a user's role to superadmin and then update database, message will indicate success in console */
     interface message {
       message:String;
     };
@@ -118,7 +118,7 @@ export class ControlpanelComponent implements OnInit {
   }
 
   promoteGroupAdmin() {
-    /* promoteGroupAdmin function will send a post request to server to promote a user's role to group admin and then update userstorage, message will indicate success in console */
+    /* promoteGroupAdmin function will send a post request to server to promote a user's role to group admin and then update database, message will indicate success in console */
     interface message {
       message:String;
     };

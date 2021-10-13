@@ -1,18 +1,15 @@
 var express = require('express');
 var app = express();
-
 var path = require('path');
-
 var cors = require('cors');
 app.use(cors());
-
 app.use(express.json());
-
 app.use(express.static(__dirname + '/../dist/chatapp'));
-console.log(__dirname);
+
+//Uncomment seeder var to rebuild the database upon running server
+//var seeder = require('./dbSeeding/seed');
 
 let http = require('http');
-const { connect } = require('http2');
 let server = http.Server(app);
 
 const io = require("socket.io")(server, {
@@ -25,15 +22,14 @@ const io = require("socket.io")(server, {
 
 const PORT = 3000;
 
-// sockets.connect(io, PORT);
+//MongoDB connection to allow sockets to store chat data
 const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017';
 const dbName = 'chatDB';
 
 io.on('connection', (socket) => {
-    //console.log('user connection on port '+ PORT + ':' + socket.id);
-
     socket.on('join room', (connection)=> {
+        /* Upon joining a room, socket will connect user to the room and emit that the user has joined to the room. It will also then store that data on the database  */
         socket.join(connection.location.groupname + connection.location.channelname);
         socket.to(connection.location.groupname + connection.location.channelname).emit('message', {username: 'System', message: connection.username + ' has joined the chat!'});
         MongoClient.connect(url, function(err, client) {
@@ -49,6 +45,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('message', (chatData)=> {
+        /* Upon message, sockets will emit the message to the specified room and save to database */
         socket.to(chatData.location.groupname + chatData.location.channelname).emit('message', chatData.chatdata);
         MongoClient.connect(url, function(err, client) {
             let db = client.db(dbName);
@@ -63,6 +60,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('leave', (disconnection)=> {
+        /*Upon leaving a room, socket will disconnect the user from room and sockets and emit a leave message to the room and save to database */
         socket.to(disconnection.location.groupname + disconnection.location.channelname).emit('message', {username: 'System', message: disconnection.username + ' has left the chat!'});
         MongoClient.connect(url, function(err, client) {
             let db = client.db(dbName);
@@ -79,14 +77,12 @@ io.on('connection', (socket) => {
     });
 });
 
-// listen.listen(app, PORT);
+//Server will listen for http requests
 serverexport = server.listen(PORT, () => {
     console.log('started on port:' +PORT);
 });
 
 module.exports = serverexport;
-
-
 
 require('./app_modules/auth/auth.js')(app);
 require('./app_modules/auth/fetchgroups.js')(app);

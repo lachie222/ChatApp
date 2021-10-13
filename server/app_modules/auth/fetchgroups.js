@@ -1,4 +1,3 @@
-var fs = require('fs');
 const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017';
 const dbName = 'chatDB';

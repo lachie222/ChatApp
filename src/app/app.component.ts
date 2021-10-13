@@ -46,8 +46,8 @@ export class AppComponent implements OnInit {
   }
 
   disconnect() {
+    /*Will disconnect a user if they navigate away from the chatroom which is stored in localStorage when they join a room */
     this.user = JSON.parse(localStorage.getItem('user')!);
-    console.log(this.user);
     this.roomName = JSON.parse(localStorage.getItem('roomName')!);
     if(this.roomName){
       this.ChatService.disconnect({username: this.user.username, location: this.roomName});
@@ -55,7 +55,7 @@ export class AppComponent implements OnInit {
   }
 
   logout() {
-    /*Logout button will clear the navbar states and clear user and group information from session storage, and return to the
+    /*Logout button will clear the navbar states and clear user and group information from local storage, and return to the
     login page */
     localStorage.clear();
     this.isAdmin = false;

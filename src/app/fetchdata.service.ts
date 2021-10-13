@@ -26,6 +26,7 @@ export class FetchdataService {
   x = 0;
 
   fetchGroups() {
+    /*This function will send a request to the serverside to fetch groups from the database and then store them in localStorage */
     interface message {
       groupdata:Array<GroupData>
     }
