@@ -46,10 +46,13 @@ io.on('connection', (socket) => {
         socket.disconnect();
     });
 });
+
 // listen.listen(app, PORT);
-server.listen(PORT, () => {
+serverexport = server.listen(PORT, () => {
     console.log('started on port:' +PORT);
 });
+
+module.exports = serverexport;
 
 
 

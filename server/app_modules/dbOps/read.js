@@ -13,7 +13,7 @@ exports.find = function(query) {
             console.log(query);
             db.collection(collection).find(content).toArray().then(function(docs) {
                 //console.log(docs);
-                resolve(docs);
+                return docs;
             }).catch((err) => {console.log(err);}).finally(() => {
                 client.close();
             });

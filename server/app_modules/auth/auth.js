@@ -16,14 +16,14 @@ module.exports = function(app) {
         password = req.body.password;
         query = {collection: 'users', query: {username: username, password: password}};
 
-        async function processResult(query) {
-            const result = await db.read(query);
+        /*async function processResult(query, res) {
+            const result = await db.read(query, res);
             return console.log(result);
         };
 
-        processResult(query);
+        processResult(query, res);*/
 
-        /*let collection = query.collection;
+        let collection = query.collection;
         let content = query.query;
         MongoClient.connect(url, function(err, client) {
             if (err) throw err;
@@ -41,7 +41,7 @@ module.exports = function(app) {
                 }
                 client.close();
             });
-        });*/
+        });
     });
 
     app.post('/api/register',function(req,res){
@@ -50,47 +50,38 @@ module.exports = function(app) {
             return res.sendStatus(400)
         }
         if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-            user.email = req.body.email;
-            user.username = req.body.username;
-            user.password = req.body.password;
-            validrequest = false;
-    
-           fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-               /*will check if req email or username is already taken, if so, return an error,
-               if not, create the new user and store in storage */
+            email = req.body.email;
+            username = req.body.username;
+            password = req.body.password;
+            query = {collection: 'users', query: {username: username, password: password, email: email, role:'user'}};
+
+            MongoClient.connect(url, function(err, client) {
+                let db = client.db(dbName);
+                let content = query.query;
+                let collection = query.collection;
+                console.log(req.body);
                 if (err) throw err;
-                let userdata = JSON.parse(data);
-                users = userdata.users;
-                for (let i=0; i<users.length; i++){
-                    if (user.username == users[i].username){
-                        validrequest = false;
-                        message = "Username already taken!";
-                        res.send({message: message});
-                        break;
-                    }else if (user.email == users[i].email){
-                        validrequest = false;
-                        message = "Email already taken!";
-                        res.send({message: message});
-                        break;
-                    }else {
-                        validrequest = true;
-                    }
-                }
-                if (validrequest == true) {
-                    newuser = new User(user.username, user.password, user.email, '', 'user');
-                    users.push(newuser);
-                    fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-                    //assignID();
-                    message = 'Account Successfully Created';
-                    res.send({message: message});
-                }
+                db.collection(collection).findOne({$or:[{email: content.email}, {username: content.username}]}, function(err, result){
+                    if (result) {
+                        if (result.email == content.email) {
+                            if (err) throw err;
+                            res.send({message: 'Error, email already exists!'});
+                            client.close();
+                        }else{
+                            res.send({message: 'Error, username already exists!'})
+                            client.close();
+                        };
+
+                    }else {db.collection(collection).insertOne(content, function(err) {
+                        if (err) throw err;
+                        res.send({message: 'User successfully created!'});
+                        client.close();
+                    })};
+                });
             });
         }else {
-            message = 'Incorrect Role!';
-            res.send({message: message})
+            res.send({message: 'User is incorrect role!'})
         }
-
-
     });
 
     app.post('/api/deleteacc',function(req,res){
@@ -99,29 +90,26 @@ module.exports = function(app) {
             return res.sendStatus(400)
         }
         if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-            user.username = req.body.username;
-    
-           fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-               /*will check if user exists, and delete if they do, or send error if they don't */
+            username = req.body.username;
+            query = {collection: 'users', query: {username: username}};
+            MongoClient.connect(url, function(err, client) {
                 if (err) throw err;
-                let userdata = JSON.parse(data);
-                users = userdata.users;
-                for (let i=0; i<users.length; i++){
-                    if (user.username == users[i].username){
-                        users.splice(i, 1);
-                        fs.writeFileSync('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2));
-                        //assignID();
-                        message = "User deleted";
-                        break;
+                let db = client.db(dbName);
+                let content = query.query;
+                let collection = query.collection;
+                db.collection(collection).deleteOne(content, function(err, result) {
+                    if (err) throw err;
+                    if(result.deletedCount > 0) {
+                        res.send({message: 'User ' + content.username + ' was deleted!'});
                     }else{
-                        message = "User does not exist";
+                        res.send({message:'User ' + content.username + ' not found!'})
                     }
-                }
-                res.send({message: message});
+                    client.close()
+                });
             });
-        }else{
-            message = 'Incorrect Role!';
-            res.send({message: message})
+
+        }else {
+            res.send({message: 'user is incorrect role'})
         }
 
 

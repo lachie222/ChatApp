@@ -3,6 +3,9 @@ var groupchannels = require('./group.js');
 var Chat = require('./chat.js');
 var Group = groupchannels.Group;
 var Channel = groupchannels.Channel;
+const MongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017';
+const dbName = 'chatDB';
 
 module.exports = function(app) {
     app.post('/api/creategroup',function(req,res){
@@ -14,17 +17,25 @@ module.exports = function(app) {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
                 groupname = req.body.groupname;
                 newgroup = new Group(groupname);
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
+                query = {collection: 'groups', query: newgroup};
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
+                    let content = query.query;
+                    let collection = query.collection;
+                    console.log(req.body);
                     if (err) throw err;
-                    let groupdata = JSON.parse(data);
-                    groupdata.groups.push(newgroup);
-
-                    fs.writeFile('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2), (err)=> {
-                        if (err) throw err;
-                        message = "Group Successfully Created";
-                        res.send({message: message});
+                    db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
+                        if (result) {
+                            res.send({message: 'Error, group already exists!'});
+                            client.close();
+                        }else {
+                            db.collection(collection).insertOne(content, function(err) {
+                            if (err) throw err;
+                            res.send({message: 'Group successfully created!'});
+                            client.close();
+                        })};
                     });
-                })
+                });
             }else {
                 message = {message:"Incorrect Role"}
                 return res.send(message) 
@@ -40,20 +51,22 @@ module.exports = function(app) {
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
                 groupname = req.body.groupname;
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
+                query = {collection: 'groups', query: {groupname: groupname}};
+                MongoClient.connect(url, function(err, client) {
                     if (err) throw err;
-                    let groupdata = JSON.parse(data);
-                    for(i=0; i<groupdata.groups.length; i++) {
-                        if (groupdata.groups[i].groupname == groupname) {
-                            groupdata.groups.splice(i, 1);
-                        }
-                    }
-                    fs.writeFile('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2), (err)=> {
+                    let db = client.db(dbName);
+                    let content = query.query;
+                    let collection = query.collection;
+                    db.collection(collection).deleteOne(content, function(err, result) {
                         if (err) throw err;
-                        message = "Group Successfully Deleted";
-                        res.send({message: message})
+                        if(result.deletedCount > 0) {
+                            res.send({message: 'Group ' + content.groupname + ' was deleted!'});
+                        }else{
+                            res.send({message:'Group ' + content.groupname + ' not found!'})
+                        }
+                        client.close()
                     });
-                })
+                });
             }else {
                 message = {message:"Incorrect Role"}
                 return res.send(message) 
@@ -68,34 +81,40 @@ module.exports = function(app) {
             return res.sendStatus(400)
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
+                groupname = req.body.groupname;
+                channelname = req.body.channelname;
+                newchannel = new Channel(channelname);
+                query = {collection: 'groups', query:{groupname: groupname}}
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
+                    let content = query.query;
+                    let collection = query.collection;
                     if (err) throw err;
-                    groupname = req.body.groupname;
-                    channelname = req.body.channelname;
-                    newchannel = new Channel(channelname);
-                    groupdata = JSON.parse(data);
-                    groupdata.groups.forEach(function(group) {
-                        group = Object.assign(new Group(), group);
-                        if (group.groupname == groupname) {
-                            group.addChannel(newchannel)
+                    db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
+                        if (result) {
+                            channelfound = false;
+                            for (i=0; i<result.channels.length; i++) {
+                                channelfound = false;
+                                if(result.channels[i].channelname == channelname) {
+                                    res.send({message: 'Error, channel already exists!'});
+                                    client.close();
+                                    channelfound = true;
+                                    break;
+                                }
+                            }
+                            if (channelfound == false) {
+                                result.channels.push(newchannel);
+                                db.collection(collection).updateOne({groupname: groupname}, {$set: result}, function(err, result) {
+                                    res.send({message: 'Channel created!'});
+                                    client.close();
+                                })
+                            }
+                        }else {
+                            res.send({message: 'Group not found!'});
+                            client.close();
                         };
                     });
-
-                    fs.readFile('./app_modules/group/chathistory.json', (err, data) => {
-                        /*Once a channel is created, it will push its location to chat history,
-                        so chats can be created/viewed */
-                        if(err) throw err;
-                        let chatdata = JSON.parse(data);
-                        newchat = new Chat(groupname, channelname);
-                        chatdata.chats.push(newchat)
-
-                        fs.writeFileSync('./app_modules/group/chathistory.json', JSON.stringify(chatdata, null, 2));
-                    });
-
-                    fs.writeFileSync('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2));
-                    message = "Channel Successfully Created";
-                    res.send({message: message});
-                })
+                });
             }else {
                 message = {message:"Incorrect Role"};
                 return res.send(message); 
@@ -110,40 +129,41 @@ module.exports = function(app) {
             return res.sendStatus(400)
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
+                groupname = req.body.groupname;
+                channelname = req.body.channelname;
+                query = {collection: 'groups', query:{groupname: groupname}}
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
+                    let content = query.query;
+                    let collection = query.collection;
                     if (err) throw err;
-                    groupname = req.body.groupname;
-                    channelname = req.body.channelname;
-                    groupdata = JSON.parse(data);
-                    for(i=0; i<groupdata.groups.length; i++) {
-                        if (groupdata.groups[i].groupname == groupname) {
-                            for(x=0; x<groupdata.groups[i].channels.length; x++) {
-                                if (groupdata.groups[i].channels[x].channelname == channelname) {
-                                    groupdata.groups[i].channels.splice(x, 1);
-                                }
+                    db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
+                        if (result) {
+                            channelfound = false;
+                            for (i=0; i<result.channels.length; i++) {
+                                if(result.channels[i].channelname == channelname) {
+                                    result.channels.splice(i, 1);
+                                    db.collection(collection).updateOne({groupname: groupname}, {$set: result}, function(err, result) {
+                                        res.send({message: 'Channel successfully deleted!'});
+                                        client.close();
+                                    });
+                                    channelfound = true;
+                                    break;
+                                };
                             };
-                        }
-                    }
-
-                    fs.readFile('./app_modules/group/chathistory.json', (err, data) => {
-                        /*Will find the channel in chat history and remove it*/
-                        if(err) throw err;
-                        let chatdata = JSON.parse(data);
-                        for(i=0; i<chatdata.chats.length; i++) {
-                            if(chatdata.chats[i].location.groupname == groupname && chatdata.chats[i].location.channelname == channelname) {
-                                chatdata.chats.splice(i, 1)
-                            }
-                        }
-                        fs.writeFileSync('./app_modules/group/chathistory.json', JSON.stringify(chatdata, null, 2));
+                            if (channelfound == false) {
+                                res.send({message: 'Channel not found'});
+                                client.close();
+                            };
+                        }else {
+                            res.send({message: 'Group not found!'});
+                            client.close();
+                        };
                     });
+                });
 
-                    fs.writeFileSync('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2));
-                    message = "Channel Successfully Deleted";
-                    res.send({message: message});
-                })
             }else {
-                message = {message:"Incorrect Role"};
-                return res.send(message); 
+                res.send({message:"Incorrect Role"}); 
             }
         }    
     });
