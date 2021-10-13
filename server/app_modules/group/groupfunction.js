@@ -1,4 +1,3 @@
-var fs = require('fs');
 var groupchannels = require('./group.js');
 var Chat = require('./chat.js');
 var Group = groupchannels.Group;
@@ -106,7 +105,10 @@ module.exports = function(app) {
                                 result.channels.push(newchannel);
                                 db.collection(collection).updateOne({groupname: groupname}, {$set: result}, function(err, result) {
                                     res.send({message: 'Channel created!'});
-                                    client.close();
+                                    chat = new Chat(groupname, channelname);
+                                    db.collection('chats').insertOne(chat, function(){
+                                        client.close();
+                                    });
                                 })
                             }
                         }else {
@@ -143,9 +145,12 @@ module.exports = function(app) {
                             for (i=0; i<result.channels.length; i++) {
                                 if(result.channels[i].channelname == channelname) {
                                     result.channels.splice(i, 1);
-                                    db.collection(collection).updateOne({groupname: groupname}, {$set: result}, function(err, result) {
+                                    db.collection(collection).updateOne({groupname: content.groupname}, {$set: result}, function(err, result) {
                                         res.send({message: 'Channel successfully deleted!'});
-                                        client.close();
+                                        chat = new Chat(groupname, channelname);
+                                        db.collection('chats').deleteOne(chat, function(){
+                                            client.close();
+                                        });
                                     });
                                     channelfound = true;
                                     break;
@@ -174,32 +179,55 @@ module.exports = function(app) {
             return res.sendStatus(400)
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
                     /*will search through group storage and match groups/channel names,
                     then will run addUser method to add a username into the channel,
                     then update storage */
-                    if (err) throw err;
                     groupname = req.body.groupname;
                     channelname = req.body.channelname;
                     username = req.body.username;
-                    groupdata = JSON.parse(data);
-                    for (i=0; i<groupdata.groups.length; i++) {
-                        if (groupdata.groups[i].groupname == groupname ) {
-                            for (x=0; x<groupdata.groups[i].channels.length; x++) {
-                                if(groupdata.groups[i].channels[x].channelname == channelname) {
-                                    groupdata.groups[i].channels[x] = Object.assign(new Channel(), groupdata.groups[i].channels[x]);
-                                    groupdata.groups[i].channels[x].addUser(username);
-                                }
-                            }
-                        }
-                    }
-                    fs.writeFileSync('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2));
-                    message ="User Successfully Added";
-                    res.send({message: message})
-                })
+                    query = {collection: 'groups', query:{groupname: groupname}}
+                    MongoClient.connect(url, function(err, client) {
+                        let db = client.db(dbName);
+                        let content = query.query;
+                        let collection = query.collection;
+                        if (err) throw err;
+                        db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
+                            if (result) {
+                                channelfound = false;
+                                userfound = false;
+                                for (i=0; i<result.channels.length; i++) {
+                                    if(result.channels[i].channelname == channelname) {
+                                        for(x=0; x<result.channels[i].users.length; x++){
+                                            if(result.channels[i].users[x] == username){
+                                                res.send({message: 'User already added'});
+                                                client.close();
+                                                userfound = true;
+                                                break;
+                                            }
+                                        }
+                                        if(userfound == false) {
+                                            result.channels[i].users.push(username);
+                                            db.collection(collection).updateOne({groupname: content.groupname}, {$set: result}, function(){
+                                                res.send({message: 'User successfully added'});
+                                                client.close();
+                                            })
+                                        }
+                                        channelfound = true;
+                                        break;
+                                    };
+                                };
+                                if (channelfound == false) {
+                                    res.send({message: 'Channel not found'});
+                                    client.close();
+                                };
+                            }else {
+                                res.send({message: 'Group not found!'});
+                                client.close();
+                            };
+                        });
+                    });
             }else {
-                message = {message:"Incorrect Role"};
-                return res.send(message); 
+                res.send({message:"Incorrect Role!"}); 
             }
         }    
     });
@@ -210,35 +238,53 @@ module.exports = function(app) {
             return res.sendStatus(400)
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
-                    /* will search through groupstorage to find channel/group combo and then
-                    find the user and remove it from the channel/group combo,
-                    then update storage */
+                groupname = req.body.groupname;
+                channelname = req.body.channelname;
+                username = req.body.username;
+                query = {collection: 'groups', query:{groupname: groupname}}
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
+                    let content = query.query;
+                    let collection = query.collection;
                     if (err) throw err;
-                    groupname = req.body.groupname;
-                    channelname = req.body.channelname;
-                    username = req.body.username;
-                    groupdata = JSON.parse(data);
-                    for (i=0; i<groupdata.groups.length; i++) {
-                        if (groupdata.groups[i].groupname == groupname ) {
-                            for (x=0; x<groupdata.groups[i].channels.length; x++) {
-                                if(groupdata.groups[i].channels[x].channelname == channelname) {
-                                    for(y=0; y<groupdata.groups[i].channels[x].users.length; y++) {
-                                        if(groupdata.groups[i].channels[x].users[y] == username) {
-                                            groupdata.groups[i].channels[x].users.splice(y, 1)
+                    db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
+                        if (result) {
+                            channelfound = false;
+                            userfound = false;
+                            for (i=0; i<result.channels.length; i++) {
+                                if(result.channels[i].channelname == channelname) {
+                                    for(x=0; x<result.channels[i].users.length; x++){
+                                        if(result.channels[i].users[x] == username){
+                                            result.channels[i].users.splice(x, 1);
+                                            db.collection(collection).updateOne({groupname: content.groupname}, {$set: result}, function(){
+                                                res.send({message: 'User successfully removed'});
+                                                client.close();
+                                            })
+                                            userfound = true;
+                                            break;
                                         }
                                     }
-                                }
-                            }
-                        }
-                    }
-                    fs.writeFileSync('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2));
-                    message ="User Successfully Removed";
-                    res.send({message: message});
-                })
+                                    if(userfound == false) {
+                                        res.send({message: 'User was not found'});
+                                        client.close();
+                                    }
+                                    channelfound = true;
+                                    break;
+                                };
+                            };
+                            if (channelfound == false) {
+                                res.send({message: 'Channel not found'});
+                                client.close();
+                            };
+                        }else {
+                            res.send({message: 'Group not found!'});
+                            client.close();
+                        };
+                    });
+                });
+
             }else {
-                message = {message:"Incorrect Role"};
-                return res.send(message); 
+                res.send({message:"Incorrect Role!"}); 
             }
         }    
     });
@@ -250,25 +296,24 @@ module.exports = function(app) {
         } else {
             if (req.body.user.role == 'superadmin') {
                 username = req.body.username;
-                fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-                    /*Search for req username in userstorage and change their role to superadmin,
-                    then update storage */
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
                     if (err) throw err;
-                    let userdata = JSON.parse(data);
-                    for(i=0; i<userdata.users.length; i++) {
-                        if (userdata.users[i].username == username) {
-                            userdata.users[i].role = 'superadmin';
+                    db.collection('users').updateOne({username: username}, {$set: {role:'superadmin'}}, function(err, result){
+                        if (result.modifiedCount > 0) {
+                            res.send({message:'User promoted to superadmin!'})
+                            client.close();
+                        }else if(result.matchedCount > 0){
+                            res.send({message:"User is already a superadmin!"});
+                            client.close();
+                        }else{
+                            res.send({message:"User not found!"});
+                            client.close();
                         }
-                    }
-                    fs.writeFile('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2), (err)=> {
-                        if (err) throw err;
-                        message = "User Successfully Promoted to Superadmin!";
-                        res.send({message: message})
                     });
-                })
+                });
             }else {
-                message = {message:"Incorrect Role"}
-                return res.send(message) 
+                res.send({message:'Incorrect Role!'})
             }
         }    
     });
@@ -280,25 +325,31 @@ module.exports = function(app) {
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
                 username = req.body.username;
-                fs.readFile('./app_modules/user/userstorage.json', (err, data) => {
-                    /* Searches through user storage to find user, then update their
-                    role to groupadmin */
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
                     if (err) throw err;
-                    let userdata = JSON.parse(data);
-                    for(i=0; i<userdata.users.length; i++) {
-                        if (userdata.users[i].username == username) {
-                            userdata.users[i].role = 'groupadmin';
+                    db.collection('users').findOne({username: username}, function(err, result) {
+                        if(result){
+                            if(result.role == 'superadmin'){
+                                res.send({message:"Can't demote superadmin"});
+                                client.close();
+                            }else if(result.role == 'groupadmin') {
+                                res.send({message:"User is already group admin"});
+                                client.close();
+                            }else{
+                                db.collection('users').updateOne({username: username}, {$set: {role:'groupadmin'}}, function(err, result) {
+                                    res.send({message:'User promoted to groupadmin!'});
+                                    client.close();
+                                })
+                            }
+                        }else{
+                            res.send({message:"User not found!"});
+                            client.close();
                         }
-                    }
-                    fs.writeFile('./app_modules/user/userstorage.json', JSON.stringify(userdata, null, 2), (err)=> {
-                        if (err) throw err;
-                        message = "User Successfully Promoted to Group Admin!";
-                        res.send({message: message})
-                    });
-                })
+                    })
+                });
             }else {
-                message = {message:"Incorrect Role"}
-                return res.send(message) 
+                res.send({message:"Incorrect Role"});
             }
         }    
     });
@@ -309,24 +360,41 @@ module.exports = function(app) {
             return res.sendStatus(400)
         } else {
             if (req.body.user.role == 'superadmin' || req.body.user.role == 'groupadmin') {
-                fs.readFile('./app_modules/group/groupstorage.json', (err, data) => {
-                    /*will locate requested group and push username into groupassis array */
+                groupname = req.body.groupname;
+                username = req.body.username;
+                query = {collection: 'groups', query:{groupname: groupname}};
+                MongoClient.connect(url, function(err, client) {
+                    let db = client.db(dbName);
+                    let content = query.query;
+                    let collection = query.collection;
                     if (err) throw err;
-                    groupname = req.body.groupname;
-                    username = req.body.username;
-                    groupdata = JSON.parse(data);
-                    groupdata.groups.forEach(function(group) {
-                        if (group.groupname == groupname) {
-                            group.groupassis.push(username);
+                    db.collection(collection).findOne({groupname: content.groupname}, function(err, result){
+                        if (result) {
+                            foundgroupassis = false;
+                            for(i=0; i<result.groupassis.length; i++) {
+                                if(result.groupassis[i] == username) {
+                                    res.send({message:"User is already groupassis of that group!"});
+                                    client.close();
+                                    foundgroupassis = true;
+                                    break;
+                                }
+                            };
+                            if(foundgroupassis == false){
+                                result.groupassis.push(username);
+                                db.collection(collection).updateOne({groupname: content.groupname},{$set: result}, function(err, result){
+                                    res.send({message:"User successfully added as groupassis"});
+                                    client.close();
+                                })
+                            }
+                        }else {
+                            res.send({message: 'Group not found!'});
+                            client.close();
                         };
                     });
-                    fs.writeFileSync('./app_modules/group/groupstorage.json', JSON.stringify(groupdata, null, 2));
-                    message = "Group Assis Successfully Created";
-                    res.send({message: message});
-                })
+                });
+
             }else {
-                message = {message:"Incorrect Role"};
-                return res.send(message); 
+                res.send({message:"Incorrect Role"}); 
             }
         }    
     });
