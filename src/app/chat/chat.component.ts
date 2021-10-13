@@ -27,7 +27,8 @@ export class ChatComponent implements OnInit {
   username:string="";
   channelname:string="";
   message:string = "";
-  roomName:string= "";
+  roomName:Object= {};
+  connection:Object = {};
   chatdata:ChatData = {username: this.user, message: this.message};
   ioConnection:any;
   messages:Array<ChatData> = [];
@@ -38,39 +39,30 @@ export class ChatComponent implements OnInit {
     Chat data will then be received using these variables as input*/
     this.groupname = this.route.snapshot.params.group;
     this.channelname = this.route.snapshot.params.channel;
-    this.roomName = this.groupname+this.channelname;
+    this.roomName = {groupname: this.groupname, channelname: this.channelname};
+    this.connection = {username: this.user.username, location: this.roomName};
     localStorage.setItem('roomName', JSON.stringify(this.roomName));
     //this.retrieveChat(this.groupname, this.channelname);
-    this.ChatService.connect(this.user.username, this.roomName);
-    this.initIoConnection()
+    this.ChatService.connect(this.connection);
+    this.initIoConnection();
+    this.retrieveChat();
   }
 
-  /*retrieveChat(groupname:String, channelname:String) {
+  retrieveChat() {
     /* Retrievechat function sends post request to server to retrieve chat history with groupname and channel name as params.
-    Chat is then stored in the chatdata variable so it can be displayed in html via data binding
+    Chat is then stored in the chatdata variable so it can be displayed in html via data binding*/
     interface chatresponse {
       chatdata:Array<ChatData>;
       message:string;
     };
 
-    this.http.post<chatresponse>('http://localhost:3000/api/retrievechat', {groupname: groupname, channelname: channelname}).subscribe(res => {
+    this.http.post<chatresponse>('http://localhost:3000/api/retrievechat', this.roomName).subscribe(res => {
         console.log(res.message);
-        this.chatdata = res.chatdata;
+        this.messages = res.chatdata;
     });
-  };*/
+  };
 
-  /*createMessage() {
-    /* createMessage function sends post request to server to create a new chat object and send it to chat history using username, groupname and channel name as params, once a message has been sent, the chat will refresh itself by calling retrievechat function and message box will be reset 
-    interface message {
-      message:string;
-    };
 
-    this.http.post<message>('http://localhost:3000/api/createchat', {user: this.user, groupname: this.groupname, channelname: this.channelname, message: this.message}).subscribe(res => {
-        this.retrieveChat(this.groupname, this.channelname);
-        console.log(res.message);
-        this.message = '';
-    });
-  };*/
 
   addUser() {
     /* addUser function will send a post request to server to add a username to the specified group/channel combos users array
@@ -108,7 +100,7 @@ export class ChatComponent implements OnInit {
   chat() {
     if(this.message) {
       this.chatdata = {username: this.user.username, message: this.message};
-      this.ChatService.send(this.chatdata, this.roomName);
+      this.ChatService.send({chatdata: this.chatdata, location: this.roomName});
       this.messages.push(this.chatdata);
       this.message='';
     }else{

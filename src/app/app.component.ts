@@ -49,8 +49,9 @@ export class AppComponent implements OnInit {
     this.user = JSON.parse(localStorage.getItem('user')!);
     console.log(this.user);
     this.roomName = JSON.parse(localStorage.getItem('roomName')!);
-    console.log(this.roomName);
-    this.ChatService.disconnect(this.user.username, this.roomName);
+    if(this.roomName){
+      this.ChatService.disconnect({username: this.user.username, location: this.roomName});
+    }
   }
 
   logout() {

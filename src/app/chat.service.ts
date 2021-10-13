@@ -20,13 +20,13 @@ export class ChatService {
   constructor() {
    };
 
-  public connect(username:string, roomName:string) {
+  public connect(connection:Object) {
     this.socket = io(SERVER_URL);
-    this.socket.emit('join room', username, roomName);
+    this.socket.emit('join room', connection);
    }
 
-  public send(chatdata:ChatData, roomName:string): void {
-    this.socket.emit('message', chatdata, roomName);
+  public send(sendChat:Object): void {
+    this.socket.emit('message', sendChat);
   }
   
   public onMessage(): Observable<any> {
@@ -36,9 +36,9 @@ export class ChatService {
     return observable;
   }
 
-  public disconnect(username:string, roomName:string) {
+  public disconnect(connection:Object) {
     if (this.socket) {;
-      this.socket.emit('leave', username, roomName);
+      this.socket.emit('leave', connection);
     }
   }
 }
