@@ -6,6 +6,8 @@ run node server.js from server directly to start server,
 comment out seeder function within server.js if you wish to keep persistent data storage between server closures.
 find on localhost:3000
 
+For integration testing, run from server directory: npm run-script integrationTest
+
 DOCUMENTATION:
 Assignment PHASE 2 Documentation:
 Student: Lachlan Manson
