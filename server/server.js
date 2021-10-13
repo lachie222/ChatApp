@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.static(__dirname + '/../dist/chatapp'));
 
 //Uncomment seeder var to rebuild the database upon running server
-//var seeder = require('./dbSeeding/seed');
+var seeder = require('./dbSeeding/seed');
 
 let http = require('http');
 let server = http.Server(app);
